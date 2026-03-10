@@ -1,0 +1,54 @@
+@use './theme.scss';
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  background-color: var(--color-bg-body);
+  color: var(--color-text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+// Global Transition
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+// Utility Classes
+.text-primary { color: var(--color-primary); }
+.text-success { color: var(--color-success); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-title { color: var(--color-text-title); font-weight: bold; }
+
+.bg-white { background-color: white; }
+
+.shadow-base { box-shadow: var(--box-shadow-base); }
+.shadow-hover:hover { box-shadow: var(--box-shadow-hover); }
+
+.cursor-pointer { cursor: pointer; }
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// Element Plus Overrides
+:root {
+  --el-color-primary: #FF5A5F;
+  --el-color-success: #00A699;
+}
+
+.el-button--primary {
+  --el-button-bg-color: var(--color-primary);
+  --el-button-border-color: var(--color-primary);
+  --el-button-hover-bg-color: #ff787c;
+  --el-button-hover-border-color: #ff787c;
+}

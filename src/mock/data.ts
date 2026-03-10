@@ -1,0 +1,481 @@
+import type { User, Homestay, Review, Order } from '@/types';
+
+// Mock Users
+export const users: User[] = [
+  {
+    userId: 1,
+    phone: '13800138000',
+    nickname: 'Guest User',
+    avatar: 'https://i.pravatar.cc/150?u=1',
+    role: 'guest',
+    status: 1,
+    createdAt: '2023-01-01 12:00:00'
+  },
+  {
+    userId: 2,
+    phone: '13900139000',
+    nickname: 'Verified Host',
+    avatar: 'https://i.pravatar.cc/150?u=2',
+    role: 'host',
+    status: 1,
+    createdAt: '2023-02-01 10:00:00'
+  },
+  {
+    userId: 3,
+    phone: '13700137000',
+    nickname: 'Admin User',
+    avatar: 'https://i.pravatar.cc/150?u=3',
+    role: 'admin',
+    status: 1,
+    createdAt: '2023-03-01 09:00:00'
+  }
+];
+
+const facilitiesList = ['免费wifi', '空调', '洗衣机', '厨房', '停车场', '电视', '游泳池', '健身房'];
+
+const getRandomFacilities = () => {
+  return facilitiesList.filter(() => Math.random() > 0.5);
+};
+
+// Mock Homestays
+export const homestays: Homestay[] = [
+  // Chengdu (4)
+  {
+    homestayId: 101,
+    landlordId: 2,
+    title: '成都太古里·云端全景落地窗江景房',
+    description: '位于成都市中心，紧邻太古里和春熙路，拥有超大落地窗，俯瞰锦江夜景。',
+    address: '四川省成都市锦江区滨江东路158号',
+    cityCode: 'chengdu',
+    location: { lat: 30.6586, lng: 104.0648 },
+    price: 458,
+    area: 65,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/101/800/600', 'https://picsum.photos/seed/101-2/800/600'],
+    rating: 4.9,
+    reviewCount: 128,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-05-10 14:20:00'
+  },
+  {
+    homestayId: 102,
+    landlordId: 2,
+    title: '成都宽窄巷子·复古小院',
+    description: '体验老成都的慢生活，独立小院，闹中取静，品茶赏花。',
+    address: '四川省成都市青羊区长顺上街',
+    cityCode: 'chengdu',
+    location: { lat: 30.6635, lng: 104.0532 },
+    price: 680,
+    area: 80,
+    roomCount: 2,
+    maxGuests: 4,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/102/800/600', 'https://picsum.photos/seed/102-2/800/600'],
+    rating: 4.8,
+    reviewCount: 96,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-06-15 09:30:00'
+  },
+  {
+    homestayId: 103,
+    landlordId: 2,
+    title: '成都大熊猫基地·亲子主题套房',
+    description: '距离大熊猫基地仅10分钟车程，熊猫主题装修，适合亲子家庭。',
+    address: '四川省成都市成华区熊猫大道',
+    cityCode: 'chengdu',
+    location: { lat: 30.7335, lng: 104.1452 },
+    price: 388,
+    area: 55,
+    roomCount: 1,
+    maxGuests: 3,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/103/800/600', 'https://picsum.photos/seed/103-2/800/600'],
+    rating: 4.7,
+    reviewCount: 210,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-07-20 16:45:00'
+  },
+  {
+    homestayId: 104,
+    landlordId: 2,
+    title: '成都九眼桥·轻奢河景公寓',
+    description: '毗邻九眼桥酒吧街，现代轻奢风格，配备高清投影。',
+    address: '四川省成都市武侯区望江路',
+    cityCode: 'chengdu',
+    location: { lat: 30.6385, lng: 104.0792 },
+    price: 298,
+    area: 45,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/104/800/600', 'https://picsum.photos/seed/104-2/800/600'],
+    rating: 4.6,
+    reviewCount: 156,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-08-05 11:10:00'
+  },
+  
+  // Dali (3)
+  {
+    homestayId: 201,
+    landlordId: 2,
+    title: '大理古城·苍山洱海观景别院',
+    description: '背靠苍山，面朝洱海，超大露台，尽享风花雪月。',
+    address: '云南省大理白族自治州大理市大理古城',
+    cityCode: 'dali',
+    location: { lat: 25.6985, lng: 100.1652 },
+    price: 1280,
+    area: 120,
+    roomCount: 3,
+    maxGuests: 6,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/201/800/600', 'https://picsum.photos/seed/201-2/800/600'],
+    rating: 4.95,
+    reviewCount: 88,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-04-12 13:20:00'
+  },
+  {
+    homestayId: 202,
+    landlordId: 2,
+    title: '大理双廊·亲水海景房',
+    description: '零距离亲水，躺在床上看日出，私享静谧时光。',
+    address: '云南省大理白族自治州大理市双廊镇',
+    cityCode: 'dali',
+    location: { lat: 25.9125, lng: 100.1892 },
+    price: 1580,
+    area: 70,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/202/800/600', 'https://picsum.photos/seed/202-2/800/600'],
+    rating: 4.85,
+    reviewCount: 132,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-05-18 15:40:00'
+  },
+  {
+    homestayId: 203,
+    landlordId: 2,
+    title: '大理喜洲·白族风情老宅',
+    description: '百年老宅改造，保留白族建筑特色，体验地道民俗。',
+    address: '云南省大理白族自治州大理市喜洲古镇',
+    cityCode: 'dali',
+    location: { lat: 25.8545, lng: 100.1282 },
+    price: 520,
+    area: 90,
+    roomCount: 2,
+    maxGuests: 4,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/203/800/600', 'https://picsum.photos/seed/203-2/800/600'],
+    rating: 4.75,
+    reviewCount: 75,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-09-22 10:00:00'
+  },
+
+  // Hangzhou (3)
+  {
+    homestayId: 301,
+    landlordId: 2,
+    title: '杭州西湖·隐居山水间',
+    description: '步行至西湖景区，隐于茶园之中，清幽雅致。',
+    address: '浙江省杭州市西湖区满觉陇路',
+    cityCode: 'hangzhou',
+    location: { lat: 30.2245, lng: 120.1252 },
+    price: 980,
+    area: 50,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/301/800/600', 'https://picsum.photos/seed/301-2/800/600'],
+    rating: 4.8,
+    reviewCount: 220,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-03-15 08:30:00'
+  },
+  {
+    homestayId: 302,
+    landlordId: 2,
+    title: '杭州灵隐·禅意空间',
+    description: '毗邻灵隐寺，日式枯山水庭院，适合修身养性。',
+    address: '浙江省杭州市西湖区灵隐支路',
+    cityCode: 'hangzhou',
+    location: { lat: 30.2415, lng: 120.1032 },
+    price: 1180,
+    area: 60,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/302/800/600', 'https://picsum.photos/seed/302-2/800/600'],
+    rating: 4.9,
+    reviewCount: 145,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-04-20 12:15:00'
+  },
+  {
+    homestayId: 303,
+    landlordId: 2,
+    title: '杭州钱江新城·云端豪宅',
+    description: '一线江景，俯瞰钱塘江灯光秀，高端现代化设施。',
+    address: '浙江省杭州市上城区富春路',
+    cityCode: 'hangzhou',
+    location: { lat: 30.2455, lng: 120.2082 },
+    price: 2200,
+    area: 150,
+    roomCount: 3,
+    maxGuests: 6,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/303/800/600', 'https://picsum.photos/seed/303-2/800/600'],
+    rating: 4.85,
+    reviewCount: 68,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-08-10 16:50:00'
+  },
+
+  // Xiamen (2)
+  {
+    homestayId: 401,
+    landlordId: 2,
+    title: '厦门鼓浪屿·百年别墅',
+    description: '岛上核心区域，红砖老别墅，听海浪声入眠。',
+    address: '福建省厦门市思明区鼓浪屿',
+    cityCode: 'xiamen',
+    location: { lat: 24.4455, lng: 118.0652 },
+    price: 880,
+    area: 55,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/401/800/600', 'https://picsum.photos/seed/401-2/800/600'],
+    rating: 4.7,
+    reviewCount: 180,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-02-25 14:00:00'
+  },
+  {
+    homestayId: 402,
+    landlordId: 2,
+    title: '厦门环岛路·海景大平层',
+    description: '出门即是沙滩，超大观景阳台，适合家庭度假。',
+    address: '福建省厦门市思明区环岛南路',
+    cityCode: 'xiamen',
+    location: { lat: 24.4325, lng: 118.1582 },
+    price: 1680,
+    area: 130,
+    roomCount: 3,
+    maxGuests: 5,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/402/800/600', 'https://picsum.photos/seed/402-2/800/600'],
+    rating: 4.8,
+    reviewCount: 95,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-06-08 11:30:00'
+  },
+
+  // Xi'an (3)
+  {
+    homestayId: 501,
+    landlordId: 2,
+    title: '西安钟楼·明城墙下小筑',
+    description: '紧邻城墙，夜游钟楼，体验古都长安的魅力。',
+    address: '陕西省西安市碑林区南大街',
+    cityCode: 'xian',
+    location: { lat: 34.2565, lng: 108.9482 },
+    price: 350,
+    area: 40,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/501/800/600', 'https://picsum.photos/seed/501-2/800/600'],
+    rating: 4.6,
+    reviewCount: 250,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-01-18 10:45:00'
+  },
+  {
+    homestayId: 502,
+    landlordId: 2,
+    title: '西安大唐不夜城·唐风雅居',
+    description: '步行至大唐不夜城，仿唐风格装修，梦回大唐。',
+    address: '陕西省西安市雁塔区慈恩路',
+    cityCode: 'xian',
+    location: { lat: 34.2185, lng: 108.9622 },
+    price: 580,
+    area: 65,
+    roomCount: 2,
+    maxGuests: 3,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/502/800/600', 'https://picsum.photos/seed/502-2/800/600'],
+    rating: 4.75,
+    reviewCount: 188,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-05-25 15:10:00'
+  },
+  {
+    homestayId: 503,
+    landlordId: 2,
+    title: '西安高新·现代商务公寓',
+    description: '位于高新区核心商圈，交通便利，适合商务出行。',
+    address: '陕西省西安市雁塔区科技路',
+    cityCode: 'xian',
+    location: { lat: 34.2355, lng: 108.8852 },
+    price: 280,
+    area: 45,
+    roomCount: 1,
+    maxGuests: 2,
+    facilities: getRandomFacilities(),
+    images: ['https://picsum.photos/seed/503/800/600', 'https://picsum.photos/seed/503-2/800/600'],
+    rating: 4.5,
+    reviewCount: 120,
+    auditStatus: 1,
+    status: 1,
+    createdAt: '2023-09-05 09:50:00'
+  }
+];
+
+// Mock Orders
+export const orders: Order[] = [
+  {
+    orderId: 1001,
+    orderNo: 'ORDER20231001001',
+    userId: 1,
+    homestayId: 101,
+    homestayInfo: homestays[0]!,
+    checkInDate: '2023-10-01',
+    checkOutDate: '2023-10-03',
+    guests: [{ name: '张三', idCard: '510101199001011234', phone: '13800138000' }],
+    contactPhone: '13800138000',
+    totalAmount: 916,
+    depositAmount: 0,
+    discountAmount: 0,
+    status: 4, // Completed
+    payStatus: 2,
+    createdAt: '2023-09-28 10:00:00',
+    payTime: '2023-09-28 10:05:00'
+  },
+  {
+    orderId: 1002,
+    orderNo: 'ORDER20231005002',
+    userId: 1,
+    homestayId: 102,
+    homestayInfo: homestays[1]!,
+    checkInDate: '2023-10-05',
+    checkOutDate: '2023-10-06',
+    guests: [{ name: '张三', idCard: '510101199001011234', phone: '13800138000' }],
+    contactPhone: '13800138000',
+    totalAmount: 680,
+    depositAmount: 0,
+    discountAmount: 0,
+    status: 0, // Pending Payment
+    payStatus: 0,
+    createdAt: '2023-10-04 09:00:00'
+  },
+  {
+    orderId: 1003,
+    orderNo: 'ORDER20231010003',
+    userId: 1,
+    homestayId: 103,
+    homestayInfo: homestays[2]!,
+    checkInDate: '2023-10-15',
+    checkOutDate: '2023-10-17',
+    guests: [{ name: '张三', idCard: '510101199001011234', phone: '13800138000' }],
+    contactPhone: '13800138000',
+    totalAmount: 776,
+    depositAmount: 0,
+    discountAmount: 0,
+    status: 2, // Confirmed / Awaiting check-in
+    payStatus: 2,
+    createdAt: '2023-10-10 14:00:00',
+    payTime: '2023-10-10 14:02:00'
+  },
+  {
+    orderId: 1004,
+    orderNo: 'ORDER20231012004',
+    userId: 1,
+    homestayId: 201,
+    homestayInfo: homestays[4]!, // Dali homestay
+    checkInDate: '2023-10-20',
+    checkOutDate: '2023-10-22',
+    guests: [{ name: '张三', idCard: '510101199001011234', phone: '13800138000' }],
+    contactPhone: '13800138000',
+    totalAmount: 2560,
+    depositAmount: 0,
+    discountAmount: 0,
+    status: 5, // Cancelled
+    payStatus: 0,
+    cancelReason: '行程变更',
+    createdAt: '2023-10-12 11:00:00'
+  },
+  {
+    orderId: 1005,
+    orderNo: 'ORDER20231018005',
+    userId: 1,
+    homestayId: 301,
+    homestayInfo: homestays[7]!, // Hangzhou homestay
+    checkInDate: '2023-11-01',
+    checkOutDate: '2023-11-03',
+    guests: [{ name: '张三', idCard: '510101199001011234', phone: '13800138000' }],
+    contactPhone: '13800138000',
+    totalAmount: 1960,
+    depositAmount: 0,
+    discountAmount: 0,
+    status: 3, // Checked-in
+    payStatus: 2,
+    createdAt: '2023-10-25 15:30:00',
+    payTime: '2023-10-25 15:35:00'
+  }
+];
+
+// Mock Reviews
+export const reviews: Review[] = [
+  {
+    reviewId: 1,
+    orderId: 1001,
+    userId: 1,
+    homestayId: 101,
+    rating: 5,
+    content: "非常棒的入住体验，房间干净整洁，景色无敌！",
+    createdAt: "2023-10-01 12:00:00",
+    auditStatus: 1,
+    user: users[0]
+  },
+  {
+    reviewId: 2,
+    orderId: 1002, // Note: Logic mismatch as 1002 is pending payment, but just for data structure example
+    userId: 1,
+    homestayId: 101,
+    rating: 4,
+    content: "位置很好，就是隔音稍微有点差。",
+    createdAt: "2023-10-05 14:00:00",
+    auditStatus: 1,
+    user: users[0]
+  },
+  {
+    reviewId: 3,
+    orderId: 1003,
+    userId: 1,
+    homestayId: 101,
+    rating: 5,
+    content: "房东很热情，推荐了很多好吃的。",
+    createdAt: "2023-10-10 16:00:00",
+    auditStatus: 1,
+    user: users[0]
+  }
+];
