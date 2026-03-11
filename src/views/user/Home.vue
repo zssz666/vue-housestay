@@ -2,6 +2,16 @@
   <div class="home-page">
     <!-- Hero Section -->
     <section class="hero-section">
+      <video
+        class="hero-video"
+        autoplay
+        muted
+        loop
+        playsinline
+        poster="/home.png"
+      >
+        <source :src="homeVideo" type="video/mp4">
+      </video>
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <h1 class="hero-title">发现独特的住宿体验</h1>
@@ -43,7 +53,8 @@
 import { ref, onMounted } from 'vue';
 import HomestayCard from '@/components/business/HomestayCard.vue';
 import { House, Ship, Sunrise, OfficeBuilding, Grape, Sugar } from '@element-plus/icons-vue';
-import { homestays } from '@/mock/data'; // Directly use mock data for demo, or call API
+import { homestays } from '@/mock/data';
+import homeVideo from '/home.mp4?url'; // Directly use mock data for demo, or call API
 
 const loading = ref(false);
 const isSticky = ref(false);
@@ -89,14 +100,25 @@ onMounted(() => {
 .hero-section {
   position: relative;
   height: 600px;
-  background-image: url('https://picsum.photos/id/10/1920/1080');
-  background-size: cover;
-  background-position: center;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: white;
+
+  .hero-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: 0;
+  }
 
   .hero-overlay {
     position: absolute;

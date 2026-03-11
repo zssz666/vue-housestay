@@ -41,10 +41,8 @@
 import { useUserStore } from '@/stores/user';
 import { List, Star, User, Ticket, Lock, Setting } from '@element-plus/icons-vue';
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
-const router = useRouter();
 
 interface MenuItem {
   label: string;
