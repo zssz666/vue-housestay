@@ -72,7 +72,6 @@ declare module 'vue' {
     ElTimelineItem: typeof import('element-plus/es')['ElTimelineItem']
     ElUpload: typeof import('element-plus/es')['ElUpload']
     FilterSidebar: typeof import('./components/business/FilterSidebar.vue')['default']
-    HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     HomestayCard: typeof import('./components/business/HomestayCard.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

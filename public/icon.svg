@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 正方形背景（主色） -->
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="#FF5A5F"/>
+  
+  <!-- 白色一笔画 -->
+  <path d="M20 48 L20 28 L32 16 L44 28 L44 48
+           M32 16 L32 8
+           M24 48 L24 36 L40 36 L40 48" 
+        stroke="white" 
+        stroke-width="3" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none"/>
+  
+  <!-- 小叶子点缀 -->
+  <path d="M44 20 Q48 16 52 20 Q48 24 44 20" fill="white" opacity="0.9"/>
+</svg>

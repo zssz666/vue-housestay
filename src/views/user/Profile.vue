@@ -10,16 +10,18 @@
         </div>
         
         <nav class="side-menu">
-          <router-link 
-            v-for="item in menuItems" 
-            :key="item.path" 
-            :to="item.path" 
+          <a
+            v-for="item in menuItems"
+            :key="item.path"
+            :href="item.isExternal ? item.path : undefined"
+            :target="item.isExternal ? '_blank' : undefined"
             class="menu-item"
-            active-class="active"
+            :class="{ active: !item.isExternal && $route.path === item.path }"
+            @click="!item.isExternal && $router.push(item.path)"
           >
             <el-icon><component :is="item.icon" /></el-icon>
             <span>{{ item.label }}</span>
-          </router-link>
+          </a>
         </nav>
       </aside>
 
@@ -37,17 +39,34 @@
 
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
-import { List, Star, User, Ticket, Lock } from '@element-plus/icons-vue';
+import { List, Star, User, Ticket, Lock, Setting } from '@element-plus/icons-vue';
+import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 const userStore = useUserStore();
+const router = useRouter();
 
-const menuItems = [
-  { label: '我的订单', path: '/user/orders', icon: List },
-  { label: '我的收藏', path: '/user/wishlist', icon: Star },
-  { label: '个人信息', path: '/user/info', icon: User },
-  { label: '发票管理', path: '/user/invoice', icon: Ticket },
-  { label: '账号安全', path: '/user/security', icon: Lock },
-];
+interface MenuItem {
+  label: string;
+  path: string;
+  icon: any;
+  isExternal?: boolean;
+}
+
+const menuItems = computed(() => {
+  const items: MenuItem[] = [
+    { label: '我的订单', path: '/user/orders', icon: List },
+    { label: '我的收藏', path: '/user/wishlist', icon: Star },
+    { label: '个人信息', path: '/user/info', icon: User },
+    { label: '发票管理', path: '/user/invoice', icon: Ticket },
+    { label: '账号安全', path: '/user/security', icon: Lock },
+  ];
+  // 管理员显示管理后台入口
+  if (userStore.userInfo?.role === 'admin') {
+    items.push({ label: '管理后台', path: '/admin/dashboard', icon: Setting, isExternal: true });
+  }
+  return items;
+});
 
 const getRoleName = (role?: string) => {
   switch (role) {

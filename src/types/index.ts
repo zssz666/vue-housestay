@@ -4,6 +4,7 @@
 export interface User {
   userId: number;
   phone: string;
+  username?: string;
   password?: string; // Optional as we might not return it in all cases, but usually backend handles this. In frontend type it might be present in form data.
   nickname: string;
   email?: string;

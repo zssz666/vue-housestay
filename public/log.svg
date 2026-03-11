@@ -1,0 +1,30 @@
+<svg width="180" height="60" viewBox="0 0 180 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 一笔画：房子+树，使用主色 #FF5A5F -->
+  <path d="M20 45 L20 25 L30 15 L40 25 L40 45 
+           M30 15 L30 10 
+           M25 45 L25 35 L35 35 L35 45
+           M45 45 L45 20 Q50 15 55 20 L55 45" 
+        stroke="#FF5A5F" 
+        stroke-width="2.5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round" 
+        fill="none"
+        opacity="0.9"/>
+  
+  <!-- 文字：栖居，使用深灰 #484848 -->
+  <text x="70" y="36" 
+        font-family="PingFang SC, -apple-system, sans-serif" 
+        font-size="24" 
+        font-weight="500" 
+        fill="#484848">栖居</text>
+  
+  <!-- 英文小字，浅灰 #767676 -->
+  <text x="70" y="48" 
+        font-family="Helvetica Neue, sans-serif" 
+        font-size="7" 
+        fill="#767676" 
+        letter-spacing="3">SIMPLE STAY</text>
+  
+  <!-- 小红点（主色强调） -->
+  <circle cx="165" cy="20" r="3" fill="#FF5A5F"/>
+</svg>

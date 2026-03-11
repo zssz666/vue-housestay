@@ -5,6 +5,8 @@ export const users: User[] = [
   {
     userId: 1,
     phone: '13800138000',
+    username: 'guest001',
+    email: 'guest@example.com',
     nickname: 'Guest User',
     avatar: 'https://i.pravatar.cc/150?u=1',
     role: 'guest',
@@ -14,6 +16,8 @@ export const users: User[] = [
   {
     userId: 2,
     phone: '13900139000',
+    username: 'host001',
+    email: 'host@example.com',
     nickname: 'Verified Host',
     avatar: 'https://i.pravatar.cc/150?u=2',
     role: 'host',
@@ -23,6 +27,8 @@ export const users: User[] = [
   {
     userId: 3,
     phone: '13700137000',
+    username: 'admin001',
+    email: 'admin@example.com',
     nickname: 'Admin User',
     avatar: 'https://i.pravatar.cc/150?u=3',
     role: 'admin',

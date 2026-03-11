@@ -6,9 +6,6 @@
       <div class="hero-content">
         <h1 class="hero-title">发现独特的住宿体验</h1>
         <p class="hero-subtitle">探索精选民宿，像当地人一样旅行</p>
-        <div class="hero-search">
-          <SearchBar />
-        </div>
       </div>
     </section>
 
@@ -44,7 +41,6 @@
 <script setup lang="ts">
 // 对应论文第5章5.2节
 import { ref, onMounted } from 'vue';
-import SearchBar from '@/components/business/SearchBar.vue';
 import HomestayCard from '@/components/business/HomestayCard.vue';
 import { House, Ship, Sunrise, OfficeBuilding, Grape, Sugar } from '@element-plus/icons-vue';
 import { homestays } from '@/mock/data'; // Directly use mock data for demo, or call API

@@ -96,11 +96,17 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const userStore = useUserStore();
-  
+
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    // In a real app, return '/login';
-    // For this demo, we allow access but might show warning
-    return true; 
+    return true;
+  }
+
+  // 验证角色权限
+  if (to.meta.role) {
+    const requiredRole = to.meta.role as string;
+    if (userStore.userInfo?.role !== requiredRole) {
+      return '/';
+    }
   }
 });
 
