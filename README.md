@@ -1,27 +1,5 @@
 # 栖居 - 民宿预定管理系统 🏠
 
-&lt;p align="center"&gt;
-  &lt;img src="https://img.shields.io/badge/Vue-3.4+-green.svg" alt="Vue3" /&gt;
-  &lt;img src="https://img.shields.io/badge/TypeScript-5.0+-blue.svg" alt="TypeScript" /&gt;
-  &lt;img src="https://img.shields.io/badge/ElementPlus-2.5+-409EFF.svg" alt="Element Plus" /&gt;
-  &lt;img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License" /&gt;
-&lt;/p&gt;
-
-&lt;p align="center"&gt;
-  &lt;b&gt;基于 Vue3 + TypeScript 的现代化民宿预定平台&lt;/b&gt;&lt;br&gt;
-  &lt;span style="color: #666; font-size: 14px;"&gt;毕业设计项目 | 成都东软学院 | 信息管理与信息系统&lt;/span&gt;
-&lt;/p&gt;
-
-&lt;p align="center"&gt;
-  &lt;a href="#项目简介"&gt;项目简介&lt;/a&gt; •
-  &lt;a href="#功能特性"&gt;功能特性&lt;/a&gt; •
-  &lt;a href="#技术栈"&gt;技术栈&lt;/a&gt; •
-  &lt;a href="#快速开始"&gt;快速开始&lt;/a&gt; •
-  &lt;a href="#项目结构"&gt;项目结构&lt;/a&gt; •
-  &lt;a href="#API接口"&gt;API接口&lt;/a&gt;
-&lt;/p&gt;
-
----
 
 ## 📖 项目简介
 
