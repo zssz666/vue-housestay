@@ -10,18 +10,18 @@
         </div>
         
         <nav class="side-menu">
-          <a
-            v-for="item in menuItems"
-            :key="item.path"
-            :href="item.isExternal ? item.path : undefined"
-            :target="item.isExternal ? '_blank' : undefined"
+          <router-link 
+            v-for="item in menuItems" 
+            :key="item.path" 
+            :to="item.path" 
             class="menu-item"
-            :class="{ active: !item.isExternal && $route.path === item.path }"
-            @click="!item.isExternal && $router.push(item.path)"
+            active-class="active"
+            :target="item.target"
+            rel="noopener"
           >
             <el-icon><component :is="item.icon" /></el-icon>
             <span>{{ item.label }}</span>
-          </a>
+          </router-link>
         </nav>
       </aside>
 
@@ -48,10 +48,10 @@ interface MenuItem {
   label: string;
   path: string;
   icon: any;
-  isExternal?: boolean;
+  target?: string;
 }
 
-const menuItems = computed(() => {
+const menuItems = computed<MenuItem[]>(() => {
   const items: MenuItem[] = [
     { label: '我的订单', path: '/user/orders', icon: List },
     { label: '我的收藏', path: '/user/wishlist', icon: Star },
@@ -61,7 +61,7 @@ const menuItems = computed(() => {
   ];
   // 管理员显示管理后台入口
   if (userStore.userInfo?.role === 'admin') {
-    items.push({ label: '管理后台', path: '/admin/dashboard', icon: Setting, isExternal: true });
+    items.push({ label: '管理后台', path: '/admin/dashboard', icon: Setting, target: '_blank' });
   }
   return items;
 });

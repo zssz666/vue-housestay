@@ -1,10 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { ElMessage } from 'element-plus';
 import MainLayout from '@/layout/MainLayout.vue';
 import Home from '@/views/user/Home.vue';
 import { useUserStore } from '@/stores/user';
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  // 使用 History 模式
+  // 部署时 base 设为仓库名（如 /vue-housestay-web/），本地开发使用 /
+  history: createWebHistory(import.meta.env.VITE_BASE_URL || '/'),
   scrollBehavior(_to, _from, savedPosition) {
     if (savedPosition) {
       return savedPosition;
@@ -94,20 +97,28 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to) => {
+router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();
 
-  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    return true;
+  // 需要认证的路由
+  if (to.meta.requiresAuth) {
+    if (!userStore.isLoggedIn) {
+      // 未登录，跳转到登录页，登录后返回原页面
+      return { path: '/login', query: { redirect: to.fullPath } };
+    }
   }
 
   // 验证角色权限
   if (to.meta.role) {
     const requiredRole = to.meta.role as string;
     if (userStore.userInfo?.role !== requiredRole) {
+      // 角色不匹配，跳转到首页
+      ElMessage.warning('您没有权限访问该页面');
       return '/';
     }
   }
+
+  next();
 });
 
 export default router;

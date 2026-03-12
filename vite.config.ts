@@ -7,7 +7,8 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base : "./",
+  // 使用环境变量，本地开发为 /，GitHub Pages 部署时为 /vue-housestay-web/
+  base: '/',
   plugins: [
     vue(),
     AutoImport({
