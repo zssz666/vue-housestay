@@ -1,5 +1,6 @@
 <template>
-  <header :class="['header', { 'header--scrolled': isScrolled }]">
+  <div class="layout-wrapper">
+    <header :class="['header', { 'header--scrolled': isScrolled }]">
     <div class="header-container">
       <!-- 左：Logo -->
       <div class="logo-container" @click="router.push('/')">
@@ -26,7 +27,7 @@
           <el-date-picker
             v-model="searchForm.dates"
             type="daterange"
-            range-separator="-"
+            range-separator="至"
             start-placeholder="入住"
             end-placeholder="退房"
             format="MM/DD"
@@ -134,6 +135,7 @@
       <p>&copy; 2026 栖居民宿预订系统 - 毕业设计作品</p>
     </div>
   </footer>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -237,6 +239,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
+.layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 .header {
   position: fixed;
   top: 0;

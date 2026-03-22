@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { homestays } from '@/mock/data';
+import { favoriteApi } from '@/api/modules/favorite';
 import HomestayCard from '@/components/business/HomestayCard.vue';
 import type { Homestay } from '@/types';
 
@@ -33,12 +33,20 @@ const router = useRouter();
 const wishlist = ref<Homestay[]>([]);
 const loading = ref(true);
 
-onMounted(() => {
-  setTimeout(() => {
-    // Mock: just pick first 3 homestays as wishlist
-    wishlist.value = homestays.slice(0, 3);
+const loadWishlist = async () => {
+  loading.value = true;
+  try {
+    const res = await favoriteApi.getList(1, 20);
+    wishlist.value = res.list;
+  } catch (error) {
+    console.error('加载收藏失败:', error);
+  } finally {
     loading.value = false;
-  }, 500);
+  }
+};
+
+onMounted(() => {
+  loadWishlist();
 });
 </script>
 

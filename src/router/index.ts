@@ -6,7 +6,6 @@ import { useUserStore } from '@/stores/user';
 
 const router = createRouter({
   // 使用 History 模式
-  // 部署时 base 设为仓库名（如 /vue-housestay-web/），本地开发使用 /
   history: createWebHistory(import.meta.env.VITE_BASE_URL || '/'),
   scrollBehavior(_to, _from, savedPosition) {
     if (savedPosition) {
@@ -97,7 +96,7 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, _from) => {
   const userStore = useUserStore();
 
   // 需要认证的路由
@@ -117,8 +116,6 @@ router.beforeEach((to, _from, next) => {
       return '/';
     }
   }
-
-  next();
 });
 
 export default router;

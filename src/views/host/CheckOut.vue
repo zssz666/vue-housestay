@@ -16,11 +16,11 @@
       <el-form :model="form" label-position="top" class="check-form">
         <h3>房间检查清单</h3>
         <div class="checklist-group">
-          <el-checkbox v-model="form.checks.key" label="钥匙/门卡归还" />
-          <el-checkbox v-model="form.checks.electric" label="电器完好（电视/空调/洗衣机）" />
-          <el-checkbox v-model="form.checks.furniture" label="家具无损坏" />
-          <el-checkbox v-model="form.checks.clean" label="基本卫生状况良好" />
-          <el-checkbox v-model="form.checks.consumables" label="消耗品无过度使用" />
+          <el-checkbox v-model="form.checks.key" value="钥匙/门卡归还">钥匙/门卡归还</el-checkbox>
+          <el-checkbox v-model="form.checks.electric" value="电器完好（电视/空调/洗衣机）">电器完好（电视/空调/洗衣机）</el-checkbox>
+          <el-checkbox v-model="form.checks.furniture" value="家具无损坏">家具无损坏</el-checkbox>
+          <el-checkbox v-model="form.checks.clean" value="基本卫生状况良好">基本卫生状况良好</el-checkbox>
+          <el-checkbox v-model="form.checks.consumables" value="消耗品无过度使用">消耗品无过度使用</el-checkbox>
         </div>
 
         <h3>损坏申报</h3>

@@ -53,13 +53,14 @@
 import { ref, onMounted } from 'vue';
 import HomestayCard from '@/components/business/HomestayCard.vue';
 import { House, Ship, Sunrise, OfficeBuilding, Grape, Sugar } from '@element-plus/icons-vue';
-import { homestays } from '@/mock/data';
-import homeVideo from '/home.mp4?url'; // Directly use mock data for demo, or call API
+import { homestayApi } from '@/api/modules/homestay';
+import homeVideo from '/home.mp4?url';
+import type { Homestay } from '@/types';
 
 const loading = ref(false);
 const isSticky = ref(false);
 const currentCategory = ref('all');
-const homestayList = ref(homestays); // Initial load
+const homestayList = ref<Homestay[]>([]);
 
 const categories = [
   { id: 'all', name: '全部', icon: House },
@@ -70,24 +71,28 @@ const categories = [
   { id: 'camping', name: '露营', icon: Sugar },
 ];
 
+// 加载房源数据
+const loadHomestays = async () => {
+  loading.value = true;
+  try {
+    const res = await homestayApi.search({ page: 1, pageSize: 20 });
+    homestayList.value = res.list;
+  } catch (error) {
+    console.error('加载房源失败:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 const selectCategory = (id: string) => {
   currentCategory.value = id;
-  loading.value = true;
-  // Simulate API fetch
-  setTimeout(() => {
-    if (id === 'all') {
-      homestayList.value = homestays;
-    } else {
-      // Simple filter for demo
-      homestayList.value = homestays.filter(_h => Math.random() > 0.5); 
-    }
-    loading.value = false;
-  }, 500);
+  loadHomestays();
 };
 
 onMounted(() => {
+  loadHomestays();
   window.addEventListener('scroll', () => {
-    isSticky.value = window.scrollY > 400; // Hero height approx
+    isSticky.value = window.scrollY > 400;
   });
 });
 </script>

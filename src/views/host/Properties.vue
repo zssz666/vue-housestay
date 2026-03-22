@@ -77,17 +77,17 @@
         <div v-show="activeStep === 1">
           <el-form-item label="基础设施">
             <el-checkbox-group v-model="form.facilities">
-              <el-checkbox label="wifi">WiFi</el-checkbox>
-              <el-checkbox label="ac">空调</el-checkbox>
-              <el-checkbox label="tv">电视</el-checkbox>
-              <el-checkbox label="washer">洗衣机</el-checkbox>
+              <el-checkbox value="wifi">WiFi</el-checkbox>
+              <el-checkbox value="ac">空调</el-checkbox>
+              <el-checkbox value="tv">电视</el-checkbox>
+              <el-checkbox value="washer">洗衣机</el-checkbox>
             </el-checkbox-group>
           </el-form-item>
           <el-form-item label="厨房设施">
             <el-checkbox-group v-model="form.facilities">
-              <el-checkbox label="kitchen">厨房</el-checkbox>
-              <el-checkbox label="fridge">冰箱</el-checkbox>
-              <el-checkbox label="microwave">微波炉</el-checkbox>
+              <el-checkbox value="kitchen">厨房</el-checkbox>
+              <el-checkbox value="fridge">冰箱</el-checkbox>
+              <el-checkbox value="microwave">微波炉</el-checkbox>
             </el-checkbox-group>
           </el-form-item>
         </div>

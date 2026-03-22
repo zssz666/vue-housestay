@@ -78,7 +78,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
-import { orders } from '@/mock/data';
+import { orderApi } from '@/api/modules/order';
 import type { Order } from '@/types';
 import { ElMessage } from 'element-plus';
 
@@ -87,6 +87,17 @@ const invoicableOrders = ref<Order[]>([]);
 const selectedOrders = ref<Order[]>([]);
 const submitting = ref(false);
 const formRef = ref();
+
+// 加载可开发票的订单
+const loadOrders = async () => {
+  try {
+    const res = await orderApi.getList({ page: 1, pageSize: 50 });
+    // 只显示已完成的订单
+    invoicableOrders.value = res.list.filter(o => o.status === 4);
+  } catch (error) {
+    console.error('加载订单失败:', error);
+  }
+};
 
 const form = reactive({
   type: 'electronic',

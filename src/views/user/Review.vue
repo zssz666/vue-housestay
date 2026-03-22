@@ -102,7 +102,8 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { orders } from '@/mock/data';
+import { orderApi } from '@/api/modules/order';
+import { reviewApi } from '@/api/modules/review';
 import type { Order } from '@/types';
 import { Plus } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus';
@@ -123,6 +124,17 @@ const form = reactive({
   tags: [] as string[],
   content: ''
 });
+
+// 加载订单详情
+const loadOrder = async () => {
+  try {
+    const orderId = Number(route.params.id);
+    order.value = await orderApi.getDetail(orderId);
+  } catch (error) {
+    console.error('加载订单失败:', error);
+    ElMessage.error('加载订单失败');
+  }
+};
 
 const isValid = computed(() => {
   return form.rating > 0 && form.content.length >= 15;

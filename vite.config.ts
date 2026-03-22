@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
+import { VantResolver } from '@vant/auto-import-resolver'
 import path from 'path'
 
 // https://vite.dev/config/
@@ -12,12 +13,18 @@ export default defineConfig({
   plugins: [
     vue(),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [
+        ElementPlusResolver(),
+        VantResolver(),
+      ],
       imports: ['vue', 'vue-router', 'pinia'],
       dts: 'src/auto-imports.d.ts',
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [
+        ElementPlusResolver(),
+        VantResolver(),
+      ],
       dts: 'src/components.d.ts',
     }),
   ],
@@ -33,4 +40,14 @@ export default defineConfig({
       },
     },
   },
+  // 配置代理，连接SpringBoot后端
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      }
+    }
+  }
 })

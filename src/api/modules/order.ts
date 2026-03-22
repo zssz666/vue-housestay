@@ -1,37 +1,53 @@
 import { request } from '@/api/request';
-import type { Order, ApiResponse, GuestInfo } from '@/types';
+import type { Order } from '@/types';
 
 export const orderApi = {
-  // Create order
+  // 创建订单
   create(data: {
     homestayId: number;
     checkInDate: string;
     checkOutDate: string;
-    guestCount: number;
-    guests: GuestInfo[];
-    contactPhone: string;
-    couponId?: number;
   }) {
-    return request.post<ApiResponse<Order>>('/order/create', data);
+    return request.post<Order>('/order/create', data);
   },
 
-  // Pay order
-  pay(orderId: number, payMethod: 'alipay' | 'wechat' | 'credit_card') {
-    return request.post<ApiResponse<{ payUrl: string }>>('/order/pay', { orderId, payMethod });
-  },
-
-  // Get order detail
+  // 获取订单详情
   getDetail(orderId: number) {
-    return request.get<ApiResponse<Order>>(`/order/${orderId}`);
+    return request.get<Order>(`/order/detail/${orderId}`);
   },
 
-  // Get user orders
-  getList(params: { status?: number; page: number; pageSize: number }) {
-    return request.get<ApiResponse<{ list: Order[]; total: number }>>('/order/list', params);
+  // 获取我的订单列表
+  myList(page = 1, size = 10) {
+    return request.get<{ list: Order[]; total: number }>('/order/my-list', { page, size });
   },
 
-  // Cancel order
+  // 获取房东订单列表
+  landlordList(page = 1, size = 10) {
+    return request.get<{ list: Order[]; total: number }>('/order/landlord-list', { page, size });
+  },
+
+  // 取消订单
   cancel(orderId: number, reason: string) {
-    return request.post<ApiResponse<void>>(`/order/${orderId}/cancel`, { reason });
+    return request.post<void>(`/order/cancel/${orderId}`, { reason });
+  },
+
+  // 支付订单
+  pay(orderId: number) {
+    return request.post<void>(`/order/pay/${orderId}`);
+  },
+
+  // 确认订单(房东)
+  confirm(orderId: number) {
+    return request.post<void>(`/order/confirm/${orderId}`);
+  },
+
+  // 入住
+  checkIn(orderId: number) {
+    return request.post<void>(`/order/check-in/${orderId}`);
+  },
+
+  // 退房
+  checkOut(orderId: number) {
+    return request.post<void>(`/order/check-out/${orderId}`);
   }
 };

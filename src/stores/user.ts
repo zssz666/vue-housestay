@@ -24,13 +24,18 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  function setUserInfo(data: User) {
+    userInfo.value = data;
+  }
+
   return {
     token,
     userInfo,
     isLoggedIn,
     login,
     logout,
-    updateUserInfo
+    updateUserInfo,
+    setUserInfo
   };
 }, {
   persist: true // Enable persistence

@@ -1,0 +1,1233 @@
+/* ============================================
+   移动端全局样式 — 途家 App 2024 精确还原
+   基准设计稿: 375px (iPhone 标准屏)
+   色彩基准: #FF9645（途家橙）
+   ============================================ */
+
+/* ============ 途家色彩系统 ============ */
+:root {
+  /* 主色 */
+  --tj-orange: #FF9645;
+  --tj-orange-dark: #FF8C3B;
+  --tj-orange-light: #FFB87A;
+  --tj-orange-bg: #FFF5EE;
+
+  /* 页面背景 */
+  --tj-bg-page: #F7F8FA;
+  --tj-bg-card: #FFFFFF;
+  --tj-bg-section: #FAFAFA;
+  --tj-bg-hover: #F5F5F5;
+
+  /* 文字色 */
+  --tj-text-title: #333333;    /* 标题 */
+  --tj-text-body: #666666;     /* 正文 */
+  --tj-text-hint: #999999;    /* 辅助文字 */
+  --tj-text-light: #CCCCCC;   /* 更淡 */
+  --tj-text-placeholder: #C9C9C9;
+
+  /* 分割线 */
+  --tj-border: #EEEEEE;
+  --tj-border-light: #F0F0F0;
+
+  /* 状态色 */
+  --tj-star: #FFB800;
+  --tj-success: #52C41A;
+  --tj-warning: #FF9800;
+  --tj-danger: #FF4D4F;
+  --tj-info: #1890FF;
+
+  /* 圆角 */
+  --tj-radius-xs: 4px;
+  --tj-radius-sm: 8px;
+  --tj-radius-md: 12px;
+  --tj-radius-lg: 16px;
+  --tj-radius-xl: 20px;
+  --tj-radius-pill: 999px;
+
+  /* 阴影（柔和不刺眼） */
+  --tj-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --tj-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --tj-shadow-bar: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  --tj-shadow-btn: 0 4px 12px rgba(255, 150, 69, 0.30);
+
+  /* 安全区 */
+  --tj-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --tj-safe-top: env(safe-area-inset-top, 0px);
+
+  /* 字体大小 */
+  --tj-fs-xs: 10px;
+  --tj-fs-sm: 12px;
+  --tj-fs-base: 13px;
+  --tj-fs-md: 14px;
+  --tj-fs-lg: 16px;
+  --tj-fs-xl: 18px;
+  --tj-fs-2xl: 20px;
+  --tj-fs-3xl: 24px;
+
+  /* ============ Vant 主题覆盖 ============ */
+  --van-primary-color: #FF9645;
+  --van-primary-color-dark: #FF8C3B;
+  --van-primary-color-light: #FFB87A;
+  --van-text-color: #333333;
+  --van-text-color-2: #666666;
+  --van-text-color-3: #999999;
+  --van-text-color-4: #CCCCCC;
+  --van-border-color: #EEEEEE;
+  --van-border-radius-lg: 12px;
+  --van-border-radius-md: 8px;
+  --van-border-radius-sm: 4px;
+  --van-background: #F7F8FA;
+  --van-background-2: #FFFFFF;
+  --van-tabbar-height: 56px;
+  --van-tabbar-background: #FFFFFF;
+  --van-tabbar-item-active-color: #FF9645;
+  --van-tabbar-item-inactive-color: #999999;
+  --van-tabbar-item-font-size: 10px;
+  --van-tabbar-item-icon-size: 22px;
+  --van-nav-bar-height: 44px;
+  --van-nav-bar-background: rgba(255, 255, 255, 0.97);
+  --van-nav-bar-icon-color: #333333;
+  --van-nav-bar-title-text-color: #333333;
+  --van-nav-bar-title-font-size: 16px;
+  --van-button-border-radius: 999px;
+  --van-button-primary-background: linear-gradient(135deg, #FF9645, #FF8C3B);
+  --van-button-primary-border-color: transparent;
+  --van-button-primary-box-shadow: 0 4px 12px rgba(255, 150, 69, 0.30);
+  --van-tabs-line-height: 40px;
+  --van-tabs-bottom-bar-height: 3px;
+  --van-tabs-bottom-bar-color: #FF9645;
+  --van-cell-font-size: 14px;
+  --van-cell-text-color: #333333;
+  --van-cell-label-color: #999999;
+  --van-cell-background: #FFFFFF;
+  --van-cell-border-color: #EEEEEE;
+  --van-field-label-width: 70px;
+  --van-field-label-color: #666666;
+  --van-search-padding: 8px 12px;
+  --van-search-background: #F0F0F0;
+  --van-search-content-background: #FFFFFF;
+  --van-search-input-height: 32px;
+  --van-calendar-popup-height: 70vh;
+  --van-calendar-header-height: 48px;
+  --van-calendar-confirm-button-height: 48px;
+  --van-divider-color: #EEEEEE;
+  --van-dialog-border-radius: 16px;
+  --van-popup-border-radius: 16px 16px 0 0;
+  --van-dialog-background: #FFFFFF;
+}
+
+/* ============ 全局 Reset ============ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html { font-size: 13px; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "PingFang SC", "Helvetica Neue", Helvetica, Arial, "Microsoft YaHei", sans-serif;
+  background-color: var(--tj-bg-page);
+  color: var(--tj-text-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+#app {
+  min-height: 100vh;
+  background-color: var(--tj-bg-page);
+}
+
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; }
+
+/* ============ 页面容器 ============ */
+.page-container {
+  min-height: 100vh;
+  background: var(--tj-bg-page);
+  padding-bottom: calc(56px + var(--tj-safe-bottom));
+  overflow-x: hidden;
+}
+
+/* ============ 途家卡片 ============ */
+.tj-card {
+  background: var(--tj-bg-card);
+  border-radius: var(--tj-radius-md);
+  box-shadow: var(--tj-shadow-card);
+  overflow: hidden;
+  margin: 0 16px 12px;
+  padding: 0;
+}
+
+.tj-card--padded {
+  padding: 14px 16px;
+}
+
+/* ============ 价格文字（途家核心样式） ============ */
+.tj-price {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: "DIN Alternate", "Roboto", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 700;
+  color: var(--tj-orange);
+  line-height: 1;
+}
+
+.tj-price__symbol {
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 1px;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.tj-price__amount {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tj-price__unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--tj-text-hint);
+  margin-left: 2px;
+}
+
+/* ============ 橙色价格大字体 ============ */
+.tj-price--lg .tj-price__amount { font-size: 24px; }
+.tj-price--lg .tj-price__symbol { font-size: 14px; }
+
+/* ============ 标签系统 ============ */
+.tj-tag {
+  display: inline-block;
+  font-size: var(--tj-fs-xs);
+  line-height: 1.4;
+  border-radius: var(--tj-radius-xs);
+  white-space: nowrap;
+}
+
+.tj-tag--orange {
+  background: var(--tj-orange-bg);
+  color: var(--tj-orange);
+  padding: 2px 6px;
+}
+
+.tj-tag--orange-solid {
+  background: linear-gradient(135deg, #FF8C3B, #FF6B00);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 0 4px 4px 0;
+}
+
+.tj-tag--gray {
+  background: var(--tj-bg-hover);
+  color: var(--tj-text-hint);
+  padding: 2px 6px;
+  border-radius: var(--tj-radius-xs);
+}
+
+.tj-tag--dot {
+  background: var(--tj-bg-hover);
+  color: var(--tj-text-hint);
+  padding: 2px 4px;
+  font-size: 10px;
+}
+
+/* ============ 房源卡片（途家瀑布流） ============ */
+.tj-home-card {
+  background: var(--tj-bg-card);
+  border-radius: var(--tj-radius-md);
+  box-shadow: var(--tj-shadow-card);
+  overflow: hidden;
+  break-inside: avoid;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.tj-home-card:hover {
+  box-shadow: var(--tj-shadow-hover);
+}
+
+.tj-home-card__img-wrap {
+  position: relative;
+  overflow: hidden;
+  background: #F0F0F0;
+}
+
+.tj-home-card__img {
+  width: 100%;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.tj-home-card:hover .tj-home-card__img {
+  transform: scale(1.03);
+}
+
+/* 角标 - 左上角渐变橙色 "超赞房东" */
+.tj-home-card__badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.tj-home-card__badge-inner {
+  background: linear-gradient(135deg, #FF8C3B, #FF6B00);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px 3px 8px;
+  border-radius: 0 0 6px 0;
+  letter-spacing: 0.3px;
+}
+
+/* 促销标签 */
+.tj-home-card__badge-inner--promo {
+  background: var(--tj-orange);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 0 0 4px 0;
+}
+
+/* 收藏按钮 - 右上角 */
+.tj-home-card__fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.tj-home-card__fav:active { transform: scale(1.25); }
+.tj-home-card__fav.is-fav { background: #FFE8E0; }
+
+/* 卡片内容 */
+.tj-home-card__body {
+  padding: 10px 11px 12px;
+}
+
+/* 房型小标签 */
+.tj-home-card__type {
+  display: inline-block;
+  font-size: 10px;
+  color: var(--tj-text-hint);
+  background: var(--tj-bg-hover);
+  padding: 2px 5px;
+  border-radius: 2px;
+  margin-bottom: 5px;
+}
+
+/* 标题 */
+.tj-home-card__title {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--tj-text-title);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 5px;
+  min-height: 2.8em;
+}
+
+/* 位置 */
+.tj-home-card__location {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-hint);
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 评分 */
+.tj-home-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-body);
+  margin-bottom: 7px;
+}
+
+.tj-home-card__rating-score {
+  font-weight: 600;
+  color: var(--tj-text-title);
+}
+
+/* 价格行 */
+.tj-home-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.tj-home-card__promo {
+  font-size: 10px;
+  color: #fff;
+  background: var(--tj-orange);
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+/* ============ 首页导航栏 ============ */
+.tj-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 44px;
+  padding-top: var(--tj-safe-top);
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 var(--tj-border);
+}
+
+.tj-nav--transparent {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ============ 分类胶囊标签 ============ */
+.tj-cat-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 0;
+  padding: 0 16px;
+  background: var(--tj-bg-card);
+  border-bottom: 1px solid var(--tj-border-light);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  align-items: center;
+}
+
+.tj-cat-scroll::-webkit-scrollbar { display: none; }
+
+.tj-cat-pill {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  font-size: var(--tj-fs-sm);
+  font-weight: 400;
+  color: var(--tj-text-body);
+  background: var(--tj-bg-hover);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: 1px solid transparent;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.tj-cat-pill:active { opacity: 0.75; transform: scale(0.96); }
+
+.tj-cat-pill.is-active {
+  background: var(--tj-orange-bg);
+  color: var(--tj-orange);
+  border-color: var(--tj-orange);
+  font-weight: 500;
+}
+
+/* ============ 房源详情 ============ */
+
+/* 图片轮播 */
+.tj-detail-swipe {
+  position: relative;
+  width: 100%;
+  background: #1A1A1A;
+}
+
+.tj-detail-swipe__indicator {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  z-index: 2;
+  letter-spacing: 0.5px;
+}
+
+.tj-detail-swipe__topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 14px;
+  padding-top: calc(10px + var(--tj-safe-top));
+  background: linear-gradient(180deg, rgba(0,0,0,0.38) 0%, transparent 100%);
+}
+
+.tj-detail-swipe__back,
+.tj-detail-swipe__action {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.tj-detail-swipe__back:active,
+.tj-detail-swipe__action:active {
+  transform: scale(0.9);
+  opacity: 0.8;
+}
+
+.tj-detail-swipe__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tj-detail-swipe__action.is-active {
+  background: rgba(255, 150, 69, 0.15);
+}
+
+/* 详情内容区 */
+.tj-detail-body {
+  padding: 16px 16px 0;
+  background: var(--tj-bg-page);
+}
+
+.tj-detail-section {
+  margin-bottom: 12px;
+}
+
+/* ============ 房东卡片 ============ */
+.tj-landlord {
+  background: var(--tj-bg-section);
+  border-radius: var(--tj-radius-sm);
+  padding: 12px;
+  margin: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tj-landlord__avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tj-landlord__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.tj-landlord__online {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tj-success);
+  border: 2px solid var(--tj-bg-section);
+}
+
+.tj-landlord__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tj-landlord__name {
+  font-size: var(--tj-fs-md);
+  font-weight: 600;
+  color: var(--tj-text-title);
+  margin-bottom: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tj-landlord__meta {
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-hint);
+}
+
+.tj-landlord__btn {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 15px;
+  background: var(--tj-bg-card);
+  color: var(--tj-orange);
+  font-size: var(--tj-fs-sm);
+  font-weight: 600;
+  border: 1px solid var(--tj-orange);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tj-landlord__btn:active {
+  background: var(--tj-orange-bg);
+}
+
+/* ============ 设施网格 ============ */
+.tj-facility-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.tj-facility-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 4px;
+  border-radius: var(--tj-radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tj-facility-item:active {
+  background: var(--tj-bg-hover);
+}
+
+.tj-facility-item__icon {
+  font-size: 18px;
+}
+
+.tj-facility-item__name {
+  font-size: 10px;
+  color: var(--tj-text-body);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.tj-facility-scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 4px 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tj-facility-scroll::-webkit-scrollbar { display: none; }
+
+/* ============ 底部悬浮预订栏 ============ */
+.tj-booking-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--tj-shadow-bar);
+  padding: 10px 16px calc(10px + var(--tj-safe-bottom));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tj-booking-bar__price {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tj-booking-bar__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.tj-booking-bar__dates {
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-hint);
+}
+
+.tj-booking-bar__hint {
+  font-size: var(--tj-fs-xs);
+  color: var(--tj-success);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tj-booking-bar__btn {
+  height: 44px;
+  padding: 0 28px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #FF9645, #FF8C3B);
+  color: #fff;
+  font-size: var(--tj-fs-md);
+  font-weight: 600;
+  border: none;
+  box-shadow: var(--tj-shadow-btn);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.3px;
+}
+
+.tj-booking-bar__btn:active {
+  opacity: 0.88;
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(255, 150, 69, 0.2);
+}
+
+/* ============ 按钮系统 ============ */
+.tj-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--tj-radius-pill);
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.tj-btn:active { opacity: 0.82; transform: scale(0.97); }
+
+.tj-btn--primary {
+  background: linear-gradient(135deg, #FF9645, #FF8C3B);
+  color: #fff;
+  box-shadow: var(--tj-shadow-btn);
+}
+
+.tj-btn--orange-outline {
+  background: transparent;
+  color: var(--tj-orange);
+  border: 1px solid var(--tj-orange);
+}
+
+.tj-btn--gray-outline {
+  background: transparent;
+  color: var(--tj-text-body);
+  border: 1px solid #DDDDDD;
+}
+
+.tj-btn--sm {
+  height: 30px;
+  padding: 0 14px;
+  font-size: var(--tj-fs-sm);
+}
+
+.tj-btn--md {
+  height: 38px;
+  padding: 0 20px;
+  font-size: var(--tj-fs-md);
+}
+
+.tj-btn--lg {
+  height: 46px;
+  padding: 0 28px;
+  font-size: var(--tj-fs-lg);
+}
+
+.tj-btn--block { width: 100%; border-radius: var(--tj-radius-md); }
+
+/* ============ 订单卡片 ============ */
+.tj-order-card {
+  background: var(--tj-bg-card);
+  border-radius: var(--tj-radius-md);
+  box-shadow: var(--tj-shadow-card);
+  margin: 0 16px 12px;
+  overflow: hidden;
+}
+
+.tj-order-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--tj-border-light);
+}
+
+.tj-order-card__body {
+  display: flex;
+  gap: 11px;
+  padding: 12px 14px;
+}
+
+.tj-order-card__cover {
+  width: 76px;
+  height: 60px;
+  border-radius: var(--tj-radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.tj-order-card__info { flex: 1; min-width: 0; }
+
+.tj-order-card__title {
+  font-size: var(--tj-fs-md);
+  font-weight: 500;
+  color: var(--tj-text-title);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.tj-order-card__dates {
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-hint);
+  margin-bottom: 2px;
+}
+
+.tj-order-card__order-no {
+  font-size: var(--tj-fs-xs);
+  color: var(--tj-text-light);
+}
+
+.tj-order-card__guests {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 14px;
+  font-size: var(--tj-fs-xs);
+  color: var(--tj-text-hint);
+  border-top: 1px solid var(--tj-border-light);
+}
+
+.tj-order-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--tj-border-light);
+}
+
+.tj-order-card__amount-label {
+  font-size: var(--tj-fs-xs);
+  color: var(--tj-text-hint);
+  margin-bottom: 1px;
+}
+
+.tj-order-card__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* 状态徽章 */
+.tj-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--tj-radius-pill);
+  font-size: var(--tj-fs-xs);
+  font-weight: 600;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.tj-status-badge--0 { background: #FFF3E0; color: #FF9800; }
+.tj-status-badge--1 { background: #E3F2FD; color: #2196F3; }
+.tj-status-badge--2 { background: #E8F5E9; color: #52C41A; }
+.tj-status-badge--3 { background: #F3E5F5; color: #9C27B0; }
+.tj-status-badge--4 { background: #F5F5F5; color: #999999; }
+.tj-status-badge--5 { background: #FFEBEE; color: #F44336; }
+
+/* ============ 个人中心 ============ */
+.tj-profile-header {
+  position: relative;
+  background: linear-gradient(135deg, #FF9645 0%, #FF7A3C 50%, #FF5A5F 100%);
+  padding: 12px 16px 22px;
+  border-radius: 0 0 32px 32px;
+}
+
+.tj-profile-user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tj-profile-user__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(255, 150, 69, 0.35);
+  flex-shrink: 0;
+}
+
+.tj-profile-user__info { flex: 1; }
+
+.tj-profile-user__name {
+  font-size: var(--tj-fs-xl);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tj-profile-user__phone {
+  font-size: var(--tj-fs-sm);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* 宫格菜单 */
+.tj-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--tj-border-light);
+  border-radius: var(--tj-radius-md);
+  overflow: hidden;
+  margin: -12px 16px 0;
+  position: relative;
+  z-index: 1;
+  box-shadow: var(--tj-shadow-card);
+}
+
+.tj-menu-item {
+  background: var(--tj-bg-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  position: relative;
+}
+
+.tj-menu-item:active { background: var(--tj-bg-hover); }
+
+.tj-menu-item__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.tj-menu-item__label {
+  font-size: var(--tj-fs-xs);
+  color: var(--tj-text-body);
+  text-align: center;
+}
+
+.tj-menu-item__badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  background: #FF4D4F;
+  color: #fff;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============ Tab 栏 ============ */
+.tj-tabbar {
+  background: var(--tj-bg-card);
+  border-top: 0.5px solid var(--tj-border-light);
+}
+
+/* 胶囊 Tab */
+.tj-capsule-tabs {
+  display: flex;
+  background: var(--tj-bg-hover);
+  border-radius: var(--tj-radius-pill);
+  padding: 3px;
+  gap: 2px;
+}
+
+.tj-capsule-tab {
+  flex: 1;
+  height: 30px;
+  border-radius: var(--tj-radius-pill);
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-body);
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  padding: 0 12px;
+  gap: 4px;
+}
+
+.tj-capsule-tab.is-active {
+  background: var(--tj-bg-card);
+  color: var(--tj-orange);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ============ 搜索页 ============ */
+.tj-search-result-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--tj-bg-card);
+  border-bottom: 1px solid var(--tj-border-light);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tj-search-result-item:active { background: var(--tj-bg-hover); }
+
+.tj-search-result-item__cover {
+  width: 100px;
+  height: 75px;
+  border-radius: var(--tj-radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.tj-search-result-item__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tj-search-result-item__title {
+  font-size: var(--tj-fs-md);
+  font-weight: 500;
+  color: var(--tj-text-title);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.tj-search-result-item__meta {
+  font-size: var(--tj-fs-xs);
+  color: var(--tj-text-hint);
+  margin-bottom: 4px;
+}
+
+.tj-search-result-item__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ============ 空状态 ============ */
+.tj-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 20px 48px;
+  gap: 10px;
+}
+
+.tj-empty__icon { font-size: 56px; opacity: 0.5; }
+
+.tj-empty__title {
+  font-size: var(--tj-fs-lg);
+  font-weight: 600;
+  color: var(--tj-text-body);
+}
+
+.tj-empty__desc {
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-hint);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ============ 评价项 ============ */
+.tj-review-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--tj-border-light);
+}
+
+.tj-review-item:last-child { border-bottom: none; }
+
+.tj-review-item__header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.tj-review-item__info { flex: 1; min-width: 0; }
+
+.tj-review-item__name {
+  font-size: var(--tj-fs-sm);
+  font-weight: 600;
+  color: var(--tj-text-title);
+  margin-bottom: 2px;
+}
+
+.tj-review-item__date {
+  font-size: var(--tj-fs-xs);
+  color: var(--tj-text-hint);
+}
+
+.tj-review-item__content {
+  font-size: var(--tj-fs-sm);
+  color: var(--tj-text-body);
+  line-height: 1.7;
+}
+
+/* ============ 分割线 ============ */
+.tj-divider {
+  border: none;
+  border-top: 1px solid var(--tj-border-light);
+  margin: 0;
+}
+
+/* ============ 交互动效 ============ */
+@keyframes tj-heart-beat {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.35); }
+  60%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+.tj-animate-heart {
+  animation: tj-heart-beat 0.45s ease forwards;
+}
+
+@keyframes tj-slide-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tj-animate-in {
+  animation: tj-slide-up 0.25s ease forwards;
+}
+
+/* ============ 文字省略 ============ */
+.tj-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tj-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* ============ 骨架屏 ============ */
+.tj-skeleton {
+  background: linear-gradient(90deg, #F2F2F2 25%, #E8E8E8 50%, #F2F2F2 75%);
+  background-size: 400% 100%;
+  animation: tj-skeleton-loading 1.5s ease infinite;
+  border-radius: var(--tj-radius-sm);
+}
+
+@keyframes tj-skeleton-loading {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ============ 预订页 ============ */
+.tj-booking-sheet {
+  background: var(--tj-bg-card);
+  border-radius: var(--tj-radius-xl) var(--tj-radius-xl) 0 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
+  margin-top: 6px;
+  animation: tj-sheet-in 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tj-sheet-in {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.tj-booking-sheet__handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: #DDDDDD;
+  margin: 12px auto 0;
+}
+
+.tj-booking-section {
+  padding: 14px 16px;
+}
+
+/* ============ 滚动条隐藏 ============ */
+.tj-no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tj-no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ============ 顶部间距占位 ============ */
+.tj-top-spacer {
+  height: 44px;
+  background: var(--tj-bg-page);
+}

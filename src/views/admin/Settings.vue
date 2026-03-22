@@ -44,8 +44,8 @@
           </el-form-item>
           <el-form-item label="发布范围">
             <el-checkbox-group v-model="notice.scope">
-              <el-checkbox label="guest">所有房客</el-checkbox>
-              <el-checkbox label="host">所有房东</el-checkbox>
+              <el-checkbox value="guest">所有房客</el-checkbox>
+              <el-checkbox value="host">所有房东</el-checkbox>
             </el-checkbox-group>
           </el-form-item>
           <el-form-item>

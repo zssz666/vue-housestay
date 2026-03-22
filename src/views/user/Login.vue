@@ -201,8 +201,8 @@
               <div class="input-group">
                 <input 
                   class="form-input" 
-                  v-model="registerForm.phone" 
-                  placeholder="手机号" 
+                  v-model="registerForm.phone"
+                  placeholder="手机号"
                   type="tel"
                   maxlength="11"
                   :class="{ error: registerFormErrors.phone }"
@@ -215,26 +215,31 @@
                   {{ registerFormErrors.phone }}
                 </span>
               </div>
-              
+
               <div class="input-group">
-                <input 
-                  class="form-input" 
-                  v-model="registerForm.code" 
-                  placeholder="验证码" 
-                  type="text"
-                  maxlength="6"
+                <input
+                  class="form-input"
+                  v-model="registerForm.password"
+                  placeholder="设置密码（至少6位）"
+                  :type="showRegisterPassword ? 'text' : 'password'"
+                  minlength="6"
                 >
-                <button 
-                  type="button" 
-                  class="code-btn"
-                  :class="{ loading: codeState.isSendingReg }"
-                  @click="sendCode('register')"
-                  :disabled="codeState.regCountdown > 0 || codeState.isSendingReg"
+                <button
+                  type="button"
+                  class="password-toggle"
+                  @click="showRegisterPassword = !showRegisterPassword"
                 >
-                  <span v-if="codeState.regCountdown > 0">{{ codeState.regCountdown }}s</span>
-                  <span v-else-if="codeState.isSendingReg">发送中...</span>
-                  <span v-else>获取验证码</span>
+                  {{ showRegisterPassword ? '🙈' : '👀' }}
                 </button>
+              </div>
+
+              <div class="input-group">
+                <input
+                  class="form-input"
+                  v-model="registerForm.confirmPassword"
+                  placeholder="确认密码"
+                  :type="showRegisterPassword ? 'text' : 'password'"
+                >
               </div>
 
               <div class="input-group">
@@ -287,9 +292,8 @@
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import type { User } from '@/types'
 import { useUserStore } from '@/stores/user'
-import { users } from '@/mock/data'
+import { authApi } from '@/api/modules/auth'
 
 const router = useRouter()
 const route = useRoute()
@@ -298,8 +302,6 @@ const userStore = useUserStore()
 // 常量
 const PHONE_REGEX = /^1[3-9]\d{9}$/
 const COUNTDOWN_SECONDS = 60
-const SMS_DELAY = 800
-const SUBMIT_DELAY = 1500
 
 // 页面状态
 const isRegister = ref(route.query.mode === 'register')
@@ -309,6 +311,7 @@ const showCharacters = ref(true)
 
 // 登录模式
 const showPassword = ref(false)
+const showRegisterPassword = ref(false)
 
 // 加载状态
 const isLoginLoading = ref(false)
@@ -337,6 +340,8 @@ const loginFormErrors = reactive({
 const registerForm = reactive({
   phone: '',
   code: '',
+  password: '',
+  confirmPassword: '',
   nickname: '',
   agree: false
 })
@@ -400,15 +405,22 @@ const sendCode = async (type: 'login' | 'register') => {
   }
 
   codeState[sendingKey] = true
-  await new Promise(resolve => setTimeout(resolve, SMS_DELAY))
-  startCountdown(type)
-  codeState[sendingKey] = false
-  ElMessage.success('验证码已发送：1234')
+
+  try {
+    // 调用后端API发送验证码
+    await authApi.sendVerifyCode(form.phone)
+    startCountdown(type)
+    ElMessage.success('验证码已发送')
+  } catch (error: any) {
+    ElMessage.error(error.message || '发送失败，请重试')
+  } finally {
+    codeState[sendingKey] = false
+  }
 }
 
 // 登录提交
 const handleLogin = async () => {
-  const { phone, code, username } = loginForm
+  const { phone, code, username, password } = loginForm
 
   if (loginMode.value === 'code') {
     if (!phone || !code) {
@@ -416,79 +428,91 @@ const handleLogin = async () => {
       return
     }
   } else {
-    if (!username || !loginForm.password) {
+    if (!username || !password) {
       ElMessage.error('请填写完整信息')
       return
     }
   }
 
   isLoginLoading.value = true
-  await new Promise(resolve => setTimeout(resolve, SUBMIT_DELAY))
 
-  // 使用 mock 数据验证 - 支持用户名、手机号、邮箱登录
-  const loginAccount = loginMode.value === 'code' ? phone : username
-  const mockUser = users.find(u =>
-    u.phone === loginAccount ||
-    u.username === loginAccount ||
-    u.email === loginAccount
-  )
-  if (mockUser) {
-    userStore.login(mockUser, 'mock-token-123')
+  try {
+    let response
+
+    if (loginMode.value === 'code') {
+      // 验证码登录 - 调用后端API
+      response = await authApi.loginByCode({
+        phone,
+        code
+      })
+    } else {
+      // 密码登录 - 调用后端API
+      const loginAccount = username || phone
+      response = await authApi.login({
+        phone: loginAccount,
+        password: password
+      })
+    }
+
+    userStore.login(response.user, response.token)
     ElMessage.success('登录成功')
-  } else {
-    ElMessage.error('用户不存在，请先注册')
+    router.push('/')
+  } catch (error: any) {
+    console.error('登录失败:', error)
+    ElMessage.error(error.message || '登录失败')
+    return false
+  } finally {
     isLoginLoading.value = false
-    return
   }
-
-  isLoginLoading.value = false
-  router.push('/')
 }
 
 // 注册提交
 const handleRegister = async () => {
-  const { phone, code, agree } = registerForm
+  const { phone, password, confirmPassword, agree } = registerForm
 
-  if (!phone || !code) {
+  if (!phone || !password) {
     ElMessage.error('请填写完整信息')
     return
   }
 
   if (!validatePhone(phone, 'register')) return
+
+  if (password.length < 6) {
+    ElMessage.error('密码至少需要6位')
+    return
+  }
+
+  if (password !== confirmPassword) {
+    ElMessage.error('两次密码输入不一致')
+    return
+  }
+
   if (!agree) {
     ElMessage.error('请同意服务协议')
     return
   }
 
   isRegisterLoading.value = true
-  await new Promise(resolve => setTimeout(resolve, SUBMIT_DELAY))
 
-  // 检查用户是否已存在
-  const existingUser = users.find(u => u.phone === phone)
-  if (existingUser) {
-    ElMessage.error('该手机号已注册，请直接登录')
+  try {
+    // 调用后端注册API
+    const response = await authApi.register({
+      phone,
+      password: password,
+      nickname: registerForm.nickname || `用户${phone.slice(-4)}`
+    })
+
+    // 自动登录
+    userStore.login(response.user, response.token)
+    ElMessage.success('注册成功')
+
+    router.push('/')
+  } catch (error: any) {
+    console.error('注册失败:', error)
+    ElMessage.error(error.message || '注册失败')
+  } finally {
     isRegisterLoading.value = false
-    return
   }
-
-  // 创建新用户并添加到 mock 数据
-  const newUser: User = {
-    userId: users.length + 1,
-    phone,
-    nickname: registerForm.nickname || `用户${phone.slice(-4)}`,
-    avatar: `https://i.pravatar.cc/150?u=${phone}`,
-    role: 'guest',
-    status: 1,
-    createdAt: new Date().toISOString().replace('T', ' ').slice(0, 19)
-  }
-  users.push(newUser)
-
-  // 自动登录
-  userStore.login(newUser, 'mock-token-' + Date.now())
-  ElMessage.success('注册成功')
-
-  isRegisterLoading.value = false
-  router.push('/')
 }
 
 // 密码输入处理

@@ -25,7 +25,7 @@
       <h3 class="filter-title">房源类型</h3>
       <el-checkbox-group v-model="roomTypes" @change="handleFilterChange">
         <div class="checkbox-item" v-for="type in roomTypeOptions" :key="type.value">
-          <el-checkbox :label="type.value">{{ type.label }}</el-checkbox>
+          <el-checkbox :value="type.value">{{ type.label }}</el-checkbox>
           <span class="count">({{ type.count }})</span>
         </div>
       </el-checkbox-group>

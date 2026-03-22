@@ -132,7 +132,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { orders as mockOrders, reviews as mockReviews } from '@/mock/data';
+import { orderApi } from '@/api/modules/order';
 import type { Order } from '@/types';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { Plus } from '@element-plus/icons-vue';
@@ -151,14 +151,22 @@ const refundDialogVisible = ref(false);
 const refundReason = ref('');
 const refundDesc = ref('');
 
+// 加载订单
+const loadOrders = async () => {
+  loading.value = true;
+  try {
+    const res = await orderApi.getList({ page: 1, pageSize: 50 });
+    orderList.value = res.list;
+  } catch (error) {
+    console.error('加载订单失败:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 // Fetch orders
 onMounted(() => {
-  loading.value = true;
-  // Simulate API fetch
-  setTimeout(() => {
-    orderList.value = JSON.parse(JSON.stringify(mockOrders)); // Deep copy to allow modification
-    loading.value = false;
-  }, 500);
+  loadOrders();
 });
 
 const hasPendingPayment = computed(() => {

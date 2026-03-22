@@ -65,8 +65,9 @@ import { useRoute } from 'vue-router';
 import FilterSidebar from '@/components/business/FilterSidebar.vue';
 import HomestayCard from '@/components/business/HomestayCard.vue';
 import { Menu, Location } from '@element-plus/icons-vue';
-import { homestays } from '@/mock/data';
+import { homestayApi } from '@/api/modules/homestay';
 import { debounce } from 'lodash';
+import type { Homestay } from '@/types';
 
 const route = useRoute();
 const loading = ref(false);
@@ -74,42 +75,62 @@ const viewType = ref('list');
 const sortBy = ref('default');
 const currentPage = ref(1);
 const pageSize = ref(10);
-const total = ref(homestays.length);
-const homestayList = ref(homestays);
+const total = ref(0);
+const homestayList = ref<Homestay[]>([]);
+
+// 搜索参数
+const searchParams = ref({
+  keyword: '',
+  cityCode: '',
+  startDate: '',
+  endDate: '',
+  guestCount: 0,
+  minPrice: 0,
+  maxPrice: 10000,
+  facilities: [] as string[]
+});
+
+// 加载房源数据
+const loadHomestays = async () => {
+  loading.value = true;
+  try {
+    const res = await homestayApi.search({
+      keyword: searchParams.value.keyword,
+      cityCode: searchParams.value.cityCode,
+      startDate: searchParams.value.startDate,
+      endDate: searchParams.value.endDate,
+      minPrice: searchParams.value.minPrice,
+      maxPrice: searchParams.value.maxPrice,
+      facilities: searchParams.value.facilities.length > 0 ? searchParams.value.facilities : undefined,
+      page: currentPage.value,
+      pageSize: pageSize.value
+    });
+    homestayList.value = res.list;
+    total.value = res.total;
+  } catch (error) {
+    console.error('搜索房源失败:', error);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const handleFilterChange = debounce((filters: any) => {
-  loading.value = true;
-  // Mock filter logic
-  setTimeout(() => {
-    let filtered = [...homestays];
-    
-    // Filter by price
-    filtered = filtered.filter(h => h.price >= filters.priceRange[0] && h.price <= filters.priceRange[1]);
-    
-    // Filter by facilities
-    if (filters.facilities.length > 0) {
-      filtered = filtered.filter(h => filters.facilities.every((f: string) => h.facilities.includes(f)));
-    }
-    
-    // Sort
-    if (sortBy.value === 'price_asc') filtered.sort((a, b) => a.price - b.price);
-    else if (sortBy.value === 'price_desc') filtered.sort((a, b) => b.price - a.price);
-    else if (sortBy.value === 'rating_desc') filtered.sort((a, b) => b.rating - a.rating);
-
-    homestayList.value = filtered;
-    total.value = filtered.length;
-    loading.value = false;
-  }, 500);
+  searchParams.value.minPrice = filters.priceRange[0];
+  searchParams.value.maxPrice = filters.priceRange[1];
+  searchParams.value.facilities = filters.facilities;
+  currentPage.value = 1;
+  loadHomestays();
 }, 500);
 
 // Sync with URL query
 watch(() => route.query, (newQuery) => {
-  // If query changes, reload list
-  console.log('Query changed:', newQuery);
+  searchParams.value.keyword = newQuery.q as string || '';
+  searchParams.value.guestCount = parseInt(newQuery.guests as string) || 0;
+  loadHomestays();
 }, { immediate: true });
 
 onMounted(() => {
-  // Initial fetch
+  // Initial fetch - handled by watch
 });
 </script>
 

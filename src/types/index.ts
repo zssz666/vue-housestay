@@ -1,4 +1,4 @@
-// 对应论文第4章数据库设计 (表4.1-4.11)
+//数据库表结构
 
 // Table 4.1: User
 export interface User {

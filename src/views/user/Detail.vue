@@ -32,12 +32,12 @@
 
         <el-divider />
 
-        <div class="host-section" v-if="mockHost">
+        <div class="host-section">
             <div class="host-info">
-              <h3>房东：{{ mockHost.nickname }}</h3>
-              <p>加入时间：{{ mockHost.createdAt.split(' ')[0] }}</p>
+              <h3>房东</h3>
+              <p>优质房东，欢迎入住</p>
             </div>
-            <el-avatar :size="56" :src="mockHost.avatar" />
+            <el-avatar :size="56" :src="homestay.images[0]" />
           </div>
 
         <el-divider />
@@ -167,8 +167,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useBookingStore } from '@/stores/booking';
 import { useUserStore } from '@/stores/user';
 import { StarFilled, Check, ArrowDown, ArrowUp } from '@element-plus/icons-vue';
-import { homestays, users, reviews as mockReviews } from '@/mock/data';
-import type { Homestay } from '@/types';
+import { homestayApi } from '@/api/modules/homestay';
+import { reviewApi } from '@/api/modules/review';
+import type { Homestay, Review } from '@/types';
 import { ElMessage } from 'element-plus';
 
 const route = useRoute();
@@ -177,6 +178,7 @@ const bookingStore = useBookingStore();
 const userStore = useUserStore();
 
 const homestay = ref<Homestay | null>(null);
+const reviews = ref<Review[]>([]);
 const loading = ref(true);
 const showImageViewer = ref(false);
 const imageIndex = ref(0);
@@ -185,8 +187,24 @@ const dates = ref<[string, string] | null>(null);
 const guests = ref(1);
 const bookingLoading = ref(false);
 
-const mockHost = users[1] || users[0]; // Fallback
-const reviews = mockReviews; // Hardcode reviews
+// 加载房源详情和评论
+const loadData = async () => {
+  loading.value = true;
+  try {
+    const id = Number(route.params.id);
+    const [homestayData, reviewsData] = await Promise.all([
+      homestayApi.getDetail(id),
+      reviewApi.getByHomestay(id, 1, 10)
+    ]);
+    homestay.value = homestayData;
+    reviews.value = reviewsData.list;
+  } catch (error) {
+    console.error('加载房源详情失败:', error);
+    ElMessage.error('加载房源详情失败');
+  } finally {
+    loading.value = false;
+  }
+};
 
 const nightCount = computed(() => {
   if (!dates.value) return 0;
@@ -241,13 +259,7 @@ const handleBook = () => {
 };
 
 onMounted(() => {
-  const id = Number(route.params.id);
-  // Mock fetch
-  const found = homestays.find(h => h.homestayId === id);
-  if (found) {
-    homestay.value = found;
-  }
-  loading.value = false;
+  loadData();
 });
 </script>
 
