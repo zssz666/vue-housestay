@@ -20,44 +20,79 @@
     </van-swipe>
     <div v-else class="tj-home-banner tj-skeleton" style="height: 160px;"></div>
 
-    <!-- ========== 途家大卡片搜索区（压在轮播图上） ========== -->
+    <!-- ========== 途家搜索大卡（城市 | 关键词 | 我的附近 + 日期 + 筛选项 + 快捷标签） ========== -->
     <div class="tj-search-wrap">
       <div class="tj-search-card">
 
-        <!-- 1. 目的地行（大字号城市名） -->
-        <div class="tj-dest-row" @click="showCityPicker = true">
-          <span class="tj-dest-row__label">目的地</span>
-          <span class="tj-dest-row__value">{{ selectedCity || '我的附近' }}</span>
-          <van-icon name="arrow-down" size="14" color="#999" />
-        </div>
-
-        <!-- 2. 日期选择行（途家核心：22px 大字号日期） -->
-        <div class="tj-date-row" @click="showDatePicker = true">
-          <div class="tj-date-cell">
-            <span class="tj-date-cell__num">{{ checkInDate ? formatDateDisplay(checkInDate) : '选择日期' }}</span>
-            <span class="tj-date-cell__tag">{{ checkInDate ? getDateTag(checkInDate) : '' }}</span>
+        <!-- 1. 城市 + 竖线 + 关键词 + 我的附近 -->
+        <div class="tj-search-loc-row">
+          <div class="tj-search-loc-row__city" @click="showCityPicker = true">
+            <span
+              class="tj-search-loc-row__city-text"
+              :class="{ 'is-placeholder': !selectedCity }"
+            >{{ selectedCity || '选择城市' }}</span>
+            <van-icon name="arrow-down" size="10" color="#999" class="tj-search-loc-row__tri" />
           </div>
-          <div class="tj-date-sep">
-            <span>—</span>
-            <span class="tj-date-sep__nights">{{ nightsCount }}晚</span>
-          </div>
-          <div class="tj-date-cell tj-date-cell--right">
-            <span class="tj-date-cell__num">{{ checkOutDate ? formatDateDisplay(checkOutDate) : '选择日期' }}</span>
-            <span class="tj-date-cell__tag">{{ checkOutDate ? getDateTag(checkOutDate) : '' }}</span>
-          </div>
-          <div class="tj-date-quick">
-            <span class="tj-date-quick__btn" @click.stop="setToday">今天</span>
-            <span class="tj-date-quick__btn" @click.stop="setTomorrow">明天</span>
+          <div class="tj-search-loc-row__vline" aria-hidden="true" />
+          <input
+            v-model="keywordDraft"
+            type="search"
+            class="tj-search-loc-row__input"
+            placeholder="位置/民宿名/编号"
+            enterkeyhint="search"
+            @keyup.enter="onSearch"
+          />
+          <div class="tj-search-loc-row__near" @click="onNearMe">
+            <van-icon name="location-o" size="22" color="#333" />
+            <span class="tj-search-loc-row__near-text">我的附近</span>
           </div>
         </div>
 
-        <!-- 3. 人数选择行 -->
-        <div class="tj-guest-row" @click="showGuestSheet = true">
-          <span class="tj-guest-row__text">{{ guestLabel }}</span>
-          <van-icon name="arrow-down" size="14" color="#999" />
+        <div class="tj-search-line" />
+
+        <!-- 2. 入住 — 离店 + 共X晚 -->
+        <div class="tj-search-date-row" @click="showDatePicker = true">
+          <div class="tj-search-date-row__cell">
+            <span class="tj-search-date-row__num">
+              {{ checkInDate ? formatDateDisplay(checkInDate) : '选择入住' }}
+            </span>
+            <span v-if="checkInDate" class="tj-search-date-row__tag">{{ getDateTag(checkInDate) }}</span>
+          </div>
+          <span class="tj-search-date-row__dash">—</span>
+          <div class="tj-search-date-row__cell tj-search-date-row__cell--end">
+            <span class="tj-search-date-row__num">
+              {{ checkOutDate ? formatDateDisplay(checkOutDate) : '选择离店' }}
+            </span>
+            <span v-if="checkOutDate" class="tj-search-date-row__tag">{{ getDateTag(checkOutDate) }}</span>
+          </div>
+          <span class="tj-search-date-row__nights">共{{ nightsCount }}晚</span>
         </div>
 
-        <!-- 4. 搜索按钮（满宽橙色大按钮） -->
+        <div class="tj-search-line" />
+
+        <!-- 3. 居室数 / 床数 / 人数 -->
+        <div class="tj-search-filter-row" @click="showGuestSheet = true">
+          <span class="tj-search-filter-row__text">{{ filterRowLabel }}</span>
+          <van-icon name="arrow-down" size="12" color="#999" />
+        </div>
+
+        <div class="tj-search-line" />
+
+        <!-- 4. 快捷标签 -->
+        <div class="tj-search-tags">
+          <button
+            v-for="tag in quickTags"
+            :key="tag.text"
+            type="button"
+            class="tj-search-tag"
+            @click="onQuickTag(tag)"
+          >
+            <van-icon v-if="tag.icon" :name="tag.icon" size="14" class="tj-search-tag__icon" />
+            <span>{{ tag.text }}</span>
+          </button>
+        </div>
+
+        <!-- 5. 开始搜索 -->
         <van-button
           type="primary"
           block
@@ -67,12 +102,6 @@
         >
           开始搜索
         </van-button>
-
-        <!-- 5. 服务承诺（简洁文字） -->
-        <div class="tj-service-tip">
-          <span class="tj-service-tip__high">10分心服务</span>
-          <span class="tj-service-tip__norm">·入住问题10分钟响应</span>
-        </div>
       </div>
     </div>
 
@@ -80,11 +109,14 @@
     <div class="tj-home-section-head">
       <span class="tj-home-section-head__title">精选民宿</span>
       <span class="tj-home-section-head__sub">品质房源，安心入住</span>
+      <button type="button" class="tj-home-refresh-btn" :disabled="refreshing" @click="onRefresh">
+        <van-loading v-if="refreshing" type="spinner" size="13" color="#FF9645" />
+        <van-icon v-else name="refresh" size="14" color="#FF9645" />
+      </button>
     </div>
 
-    <!-- ========== 下拉刷新 + 房源瀑布流 ========== -->
-    <van-pull-refresh v-model="refreshing" success-text="刷新成功" @refresh="onRefresh">
-      <div class="tj-waterfall">
+    <!-- ========== 房源瀑布流 ========== -->
+    <div class="tj-waterfall">
 
         <!-- 左列 -->
         <div class="tj-waterfall__col">
@@ -102,9 +134,9 @@
                 class="tj-home-card__img"
                 loading="lazy"
               />
-              <!-- 左上角超赞房东角标 -->
+              <!-- 左上角精品房源角标 -->
               <div class="tj-home-card__badge" v-if="item.isSuperHost">
-                <div class="tj-home-card__badge-inner">超赞房东</div>
+                <div class="tj-home-card__badge-inner">精品房源</div>
               </div>
               <!-- 右上角收藏 -->
               <div
@@ -219,7 +251,6 @@
       </div>
 
       <div style="height: 16px;"></div>
-    </van-pull-refresh>
 
     <!-- ========== 日期选择弹窗 ========== -->
     <van-calendar
@@ -323,6 +354,15 @@ const showGuestSheet = ref(false);
 
 const guestCount = ref(1);
 const childCount = ref(0);
+const keywordDraft = ref('');
+const filterRowLabel = '居室数 / 床数 / 人数';
+
+const quickTags = [
+  { icon: 'gift-o', text: '积分当钱花' },
+  { text: '文殊院', keyword: '文殊院' },
+  { text: '青羊区', keyword: '青羊区' },
+];
+
 const today = new Date();
 const maxDate = new Date(Date.now() + 365 * 24 * 3600 * 1000);
 
@@ -345,16 +385,6 @@ const nightsCount = computed(() => {
   if (!checkInDate.value || !checkOutDate.value) return 1;
   const diff = new Date(checkOutDate.value).getTime() - new Date(checkInDate.value).getTime();
   return Math.max(1, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-});
-
-const guestLabel = computed(() => {
-  const adult = guestCount.value;
-  const child = childCount.value;
-  if (adult === 0 && child === 0) return '1室1厅·1张床·2人';
-  const parts: string[] = [];
-  if (adult) parts.push(`${adult}位成人`);
-  if (child) parts.push(`${child}位儿童`);
-  return parts.join('·') || '选择人数';
 });
 
 const leftItems = computed(() => homestayList.value.filter((_, i) => i % 2 === 0));
@@ -471,8 +501,34 @@ async function onRefresh() {
 
 // ========== 搜索卡片交互方法 ==========
 function onSearch() {
-  if (selectedCity.value) searchStore.setCity(selectedCity.value);
+  searchStore.setKeyword(keywordDraft.value.trim());
+  const hit = cities.find((c) => c.label === selectedCity.value);
+  if (hit) {
+    searchStore.setCity(hit.value);
+  } else {
+    searchStore.setCity('');
+  }
   router.push('/search');
+}
+
+function onNearMe() {
+  selectedCity.value = '';
+  searchStore.setCity('');
+  showToast('已切换为我的附近');
+}
+
+function onQuickTag(tag: { icon?: string; text: string; keyword?: string }) {
+  if (tag.keyword) {
+    keywordDraft.value = tag.keyword;
+    return;
+  }
+  if (tag.text === '积分当钱花') {
+    showToast('积分可抵现，下单时选择使用');
+  }
+}
+
+function onServiceRule() {
+  showToast('详见预订须知与服务承诺');
 }
 
 function selectCity(city: { label: string; value: string }) {
@@ -487,13 +543,6 @@ function setToday() {
   searchStore.setDateRange(fmt(today), fmt(tomorrow));
 }
 
-function setTomorrow() {
-  const fmt = (d: Date) => d.toISOString().slice(0, 10);
-  const tomorrow = new Date(today.getTime() + 86400000);
-  const dayAfter = new Date(today.getTime() + 86400000 * 2);
-  searchStore.setDateRange(fmt(tomorrow), fmt(dayAfter));
-}
-
 function onDateConfirm(values: [Date, Date]) {
   const fmt = (d: Date) => d.toISOString().slice(0, 10);
   searchStore.setDateRange(fmt(values[0]), fmt(values[1]));
@@ -505,6 +554,18 @@ function onGuestChange(_val: number) {
 }
 
 onMounted(async () => {
+  if (searchStore.cityCode) {
+    const c = cities.find((x) => x.value === searchStore.cityCode);
+    selectedCity.value = c?.label ?? '';
+  } else {
+    selectedCity.value = '成都';
+    searchStore.setCity('chengdu');
+  }
+  if (!searchStore.checkIn || !searchStore.checkOut) {
+    setToday();
+  }
+  keywordDraft.value = searchStore.keyword;
+
   await Promise.all([loadBanners(), loadHomestays()]);
 });
 </script>
@@ -521,132 +582,225 @@ onMounted(async () => {
 .tj-search-card {
   background: #ffffff;
   border-radius: 16px;
-  padding: 22px 20px 18px;
+  padding: 18px 16px 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
 }
 
-/* 1. 目的地行 */
-.tj-dest-row {
+/* 1. 城市 | 竖线 | 关键词 | 我的附近 */
+.tj-search-loc-row {
   display: flex;
   align-items: center;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #F5F5F5;
-  cursor: pointer;
+  gap: 10px;
+  min-height: 44px;
 }
 
-.tj-dest-row__label {
-  font-size: 13px;
-  color: #999;
-  margin-right: 14px;
+.tj-search-loc-row__city {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   flex-shrink: 0;
+  max-width: 72px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.65;
+  }
 }
 
-.tj-dest-row__value {
-  flex: 1;
-  font-size: 20px;
+.tj-search-loc-row__city-text {
+  font-size: 16px;
   font-weight: 700;
   color: #333;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
 
-/* 2. 日期选择行 */
-.tj-date-row {
-  display: flex;
-  align-items: center;
-  padding: 18px 0;
-  border-bottom: 1px solid #F5F5F5;
-  cursor: pointer;
-}
-
-.tj-date-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-
-  &.tj-date-cell--right { align-items: flex-end; }
-}
-
-.tj-date-cell__num {
-  font-size: 22px;
-  font-weight: 700;
-  color: #333;
-  line-height: 1;
-  letter-spacing: 0.3px;
-}
-
-.tj-date-cell__tag {
-  font-size: 11px;
-  color: #999;
-  background: #F5F5F5;
-  padding: 2px 7px;
-  border-radius: 4px;
-  line-height: 1.4;
-}
-
-.tj-date-sep {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0 14px;
-  gap: 4px;
-
-  span:first-child {
-    color: #DDD;
-    font-size: 14px;
+  &.is-placeholder {
+    font-weight: 600;
+    color: #999;
   }
 }
 
-.tj-date-sep__nights {
-  font-size: 11px;
-  color: #FF9645;
-  font-weight: 600;
-  background: #FFF3E0;
-  padding: 2px 7px;
-  border-radius: 10px;
+.tj-search-loc-row__tri {
+  flex-shrink: 0;
+  transform: rotate(0deg);
 }
 
-.tj-date-quick {
-  display: flex;
-  gap: 6px;
-  margin-left: auto;
+.tj-search-loc-row__vline {
+  width: 1px;
+  height: 22px;
+  background: #eeeeee;
   flex-shrink: 0;
 }
 
-.tj-date-quick__btn {
-  font-size: 11px;
-  color: #FF9645;
-  background: #FFF3E0;
-  padding: 3px 9px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
+.tj-search-loc-row__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: #333;
+  padding: 6px 0;
 
-  &:active { background: #FFE4CC; }
+  &::placeholder {
+    color: #c9c9c9;
+  }
 }
 
-/* 3. 人数选择行 */
-.tj-guest-row {
+.tj-search-loc-row__near {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: 14px 0 10px;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 52px;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.65;
+  }
 }
 
-.tj-guest-row__text {
-  font-size: 15px;
+.tj-search-loc-row__near-text {
+  font-size: 10px;
+  color: #666;
+  margin-top: 2px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.tj-search-line {
+  height: 1px;
+  background: #f5f5f5;
+  margin: 4px 0 0;
+}
+
+/* 2. 日期行 */
+.tj-search-date-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 0 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.tj-search-date-row__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+
+  &--end {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+.tj-search-date-row__num {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.1;
+  letter-spacing: 0.2px;
+}
+
+.tj-search-date-row__tag {
+  font-size: 11px;
+  color: #999;
+  line-height: 1.2;
+}
+
+.tj-search-date-row__dash {
+  color: #ddd;
+  font-size: 14px;
+  margin: 0 10px 0 8px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.tj-search-date-row__nights {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #999;
+  padding-top: 4px;
+  white-space: nowrap;
+}
+
+/* 3. 居室数 / 床数 / 人数 */
+.tj-search-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.75;
+  }
+}
+
+.tj-search-filter-row__text {
+  font-size: 14px;
   color: #333;
 }
 
-/* 4. 搜索按钮 */
+/* 4. 快捷标签 */
+.tj-search-tags {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 14px;
+  margin: 0 -2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tj-search-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  background: #f5f5f5;
+  font-size: 12px;
+  color: #666;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.8;
+    background: #ebebeb;
+  }
+}
+
+.tj-search-tag__icon {
+  color: #ff9645;
+}
+
+/* 5. 搜索按钮 */
 .tj-search-btn {
   height: 46px;
   font-size: 17px;
   font-weight: 700;
-  background: linear-gradient(135deg, #FF9645 0%, #FF7A3C 100%) !important;
+  background: linear-gradient(135deg, #ff9645 0%, #ff7a3c 100%) !important;
   border: none !important;
   border-radius: 24px !important;
   box-shadow: 0 6px 18px rgba(255, 150, 69, 0.38);
@@ -659,24 +813,38 @@ onMounted(async () => {
   }
 }
 
-/* 5. 服务承诺 */
+/* 6. 服务说明 */
 .tj-service-tip {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  margin-top: 16px;
+  gap: 0;
+  margin-top: 14px;
+  padding: 0 4px;
+  line-height: 1.5;
 }
 
 .tj-service-tip__high {
   font-size: 12px;
-  color: #FF9645;
+  color: #ff4d4f;
   font-weight: 700;
 }
 
 .tj-service-tip__norm {
   font-size: 12px;
+  color: #666;
+}
+
+.tj-service-tip__rule {
+  font-size: 12px;
   color: #999;
+  margin-left: 2px;
+  cursor: pointer;
+
+  &:active {
+    opacity: 0.65;
+  }
 }
 
 /* ========== Banner ========== */
@@ -713,6 +881,27 @@ onMounted(async () => {
   align-items: baseline;
   gap: 8px;
   padding: 18px 16px 10px;
+}
+
+.tj-home-refresh-btn {
+  margin-left: auto;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active {
+    opacity: 0.7;
+  }
+
+  &:disabled {
+    cursor: default;
+  }
 }
 
 .tj-home-section-head__title {

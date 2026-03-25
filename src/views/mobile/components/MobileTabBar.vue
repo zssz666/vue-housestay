@@ -2,146 +2,133 @@
   <div class="mobile-tab-wrapper">
     <router-view />
 
-    <nav class="tj-tabbar">
+    <div class="tab-bar">
       <router-link
-        v-for="tab in tabs"
-        :key="tab.path"
-        :to="tab.path"
-        class="tj-tabbar__item"
-        :class="{ 'is-active': isActive(tab.path) }"
+        v-for="item in tabs"
+        :key="item.path"
+        :to="item.path"
+        class="tab-item"
+        :class="{ active: isActive(item.path) }"
       >
-        <div class="tj-tabbar__icon">
-          <van-icon :name="isActive(tab.path) ? tab.activeIcon : tab.icon" size="24" />
-          <van-badge
-            v-if="tab.badge"
-            :content="tab.badge"
-            class="tj-tabbar__badge"
+        <div class="icon-wrapper">
+          <van-icon
+            :name="isActive(item.path) ? item.activeIcon : item.icon"
+            size="22"
           />
+          <van-badge v-if="item.badge" :content="item.badge" class="badge" />
         </div>
-        <span class="tj-tabbar__text">{{ tab.label }}</span>
+        <span class="tab-text">{{ item.title }}</span>
       </router-link>
-    </nav>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 
-const route = useRoute();
+const route = useRoute()
 
 const tabs = ref([
-  {
-    label: '首页',
-    path: '/',
-    icon: 'wap-home-o',
-    activeIcon: 'wap-home',
-    badge: null,
-  },
-  {
-    label: '收藏',
-    path: '/favorites',
-    icon: 'like-o',
-    activeIcon: 'like',
-    badge: null,
-  },
-  {
-    label: '消息',
-    path: '/messages',
-    icon: 'chat-o',
-    activeIcon: 'chat',
-    badge: '3',
-  },
-  {
-    label: '订单',
-    path: '/orders',
-    icon: 'orders-o',
-    activeIcon: 'orders',
-    badge: null,
-  },
-  {
-    label: '我的',
-    path: '/profile',
-    icon: 'user-o',
-    activeIcon: 'user',
-    badge: null,
-  },
-]);
+  { title: '首页', path: '/', icon: 'wap-home-o', activeIcon: 'wap-home' },
+  { title: '收藏', path: '/favorites', icon: 'like-o', activeIcon: 'like' },
+  { title: '消息', path: '/messages', icon: 'chat-o', activeIcon: 'chat', badge: '3' },
+  { title: '订单', path: '/orders', icon: 'balance-list-o', activeIcon: 'balance-list' },
+  { title: '我的', path: '/profile', icon: 'user-o', activeIcon: 'user' }
+])
 
 function isActive(path: string): boolean {
-  if (path === '/') return route.path === '/';
-  return route.path.startsWith(path);
+  if (path === '/') return route.path === '/'
+  return route.path.startsWith(path)
 }
 </script>
 
 <style scoped lang="scss">
+/* 内容区底部留白：胶囊高度 + 离底边距 + 安全区 + 多留一点避免贴边 */
 .mobile-tab-wrapper {
   width: 100%;
   min-height: 100vh;
-  background: var(--tj-bg-page);
+  padding-bottom: calc(56px + 20px + env(safe-area-inset-bottom));
 }
 
-.tj-tabbar {
+/* 子页里若用了全局 .page-container，会与 wrapper 双重留白，这里只保留少量收尾间距 */
+.mobile-tab-wrapper :deep(.page-container) {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 漂浮胶囊底栏：不占满宽、大圆角、投影 */
+.tab-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50px;
-  background: #ffffff;
-  border-top: 0.5px solid #eeeeee;
+  left: 15px;
+  right: 15px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 900;
+  height: 56px;
+  padding: 0 4px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding-bottom: env(safe-area-inset-bottom);
-  z-index: 900;
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.tj-tabbar__item {
+.tab-item {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-width: 0;
+  height: 100%;
   text-decoration: none;
   color: #999999;
-  height: 100%;
-  cursor: pointer;
-  transition: opacity 0.15s;
 
-  &:active { opacity: 0.65; }
+  .icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-  &.is-active {
-    color: #FF9645;
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -8px;
+      transform: scale(0.92);
+      transform-origin: top right;
+    }
+
+    /* 角标：红底白字，贴近参考图 */
+    :deep(.van-badge) {
+      border: 2px solid #fff;
+      box-sizing: content-box;
+    }
+
+    :deep(.van-badge--fixed) {
+      background: #ff4d4f;
+    }
   }
-}
 
-.tj-tabbar__icon {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2px;
-  width: 24px;
-  height: 24px;
-}
+  .tab-text {
+    font-size: 10px;
+    margin-top: 2px;
+    transform: scale(0.9);
+    line-height: 1.2;
+  }
 
-.tj-tabbar__badge {
-  position: absolute;
-  top: -4px;
-  right: -8px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 3px;
-  font-size: 10px;
-  line-height: 16px;
-  border-radius: 8px;
-  background: #FF4C4C;
-  color: #fff;
-}
+  &.active {
+    color: #ff9645;
 
-.tj-tabbar__text {
-  font-size: 10px;
-  transform: scale(0.9);
-  transform-origin: center top;
+    :deep(.van-icon) {
+      color: #ff9645;
+    }
+  }
+
+  &:active {
+    opacity: 0.7;
+  }
 }
 </style>

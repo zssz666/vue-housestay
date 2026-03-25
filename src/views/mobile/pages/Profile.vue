@@ -10,6 +10,7 @@
           :src="userInfo?.avatar || defaultAvatar"
           :alt="userInfo?.nickname"
           class="tj-profile-user__avatar"
+          @click="router.push('/edit-profile')"
         />
         <div class="tj-profile-user__info">
           <div class="tj-profile-user__name">
@@ -18,6 +19,9 @@
             <span v-else class="tj-tag tj-tag--gray">未实名</span>
           </div>
           <div class="tj-profile-user__phone">{{ userInfo?.phone ? maskPhone(userInfo.phone) : '' }}</div>
+        </div>
+        <div class="tj-profile-user__edit" @click="router.push('/edit-profile')">
+          <van-icon name="edit" size="16" color="rgba(255,255,255,0.7)" />
         </div>
       </div>
       <!-- 未登录 -->
@@ -39,32 +43,23 @@
         <div class="tj-profile-section-head">
           <span class="tj-profile-section-title">我的订单</span>
         </div>
-        <div class="tj-menu-grid">
-          <div class="tj-menu-item" @click="router.push('/orders?tab=0')">
-            <div class="tj-menu-item__icon" style="background: #FFF3E0;">
-              <van-icon name="waiting-payment" size="20" color="#FF9800" />
+        <div class="order-status-grid">
+          <div
+            v-for="item in orderStatus"
+            :key="item.key"
+            class="status-item"
+            @click="router.push(`/orders?tab=${item.tabIndex}`)"
+          >
+            <div class="icon-wrapper" :style="{ background: item.bgColor }">
+              <van-icon :name="item.icon" size="22" :color="item.iconColor" />
+              <van-badge
+                v-if="item.count > 0"
+                :content="item.count"
+                :max="99"
+                class="status-badge"
+              />
             </div>
-            <span class="tj-menu-item__label">待支付</span>
-            <span v-if="orderStats.pending" class="tj-menu-item__badge">{{ orderStats.pending }}</span>
-          </div>
-          <div class="tj-menu-item" @click="router.push('/orders?tab=1')">
-            <div class="tj-menu-item__icon" style="background: #E3F2FD;">
-              <van-icon name="clock" size="20" color="#2196F3" />
-            </div>
-            <span class="tj-menu-item__label">待确认</span>
-          </div>
-          <div class="tj-menu-item" @click="router.push('/orders?tab=2')">
-            <div class="tj-menu-item__icon" style="background: #E8F5E9;">
-              <van-icon name="todo-list-o" size="20" color="#52C41A" />
-            </div>
-            <span class="tj-menu-item__label">待入住</span>
-            <span v-if="orderStats.toCheckIn" class="tj-menu-item__badge">{{ orderStats.toCheckIn }}</span>
-          </div>
-          <div class="tj-menu-item" @click="router.push('/orders?tab=4')">
-            <div class="tj-menu-item__icon" style="background: #F3E5F5;">
-              <van-icon name="completed" size="20" color="#9C27B0" />
-            </div>
-            <span class="tj-menu-item__label">已完成</span>
+            <span class="status-text">{{ item.label }}</span>
           </div>
         </div>
       </div>
@@ -98,7 +93,7 @@
       <div class="tj-card" style="padding: 4px 0;">
         <!-- 同行人管理 -->
         <div class="tj-profile-cell" @click="router.push('/guest')">
-          <van-icon name="friends-o" size="20" color="#607D8B" />
+          <van-icon name="contact" size="20" color="#607D8B" />
           <span>常用入住人</span>
           <span class="tj-profile-cell__extra">{{ guestCount }}位</span>
           <van-icon name="arrow" size="14" color="#CCC" />
@@ -106,28 +101,28 @@
         <div class="tj-divider" style="margin: 0 16px;"></div>
         <!-- 发票管理 -->
         <div class="tj-profile-cell" @click="router.push('/invoice')">
-          <van-icon name="coupon-o" size="20" color="#E91E63" />
+          <van-icon name="balance-passed-o" size="20" color="#E91E63" />
           <span>发票管理</span>
           <van-icon name="arrow" size="14" color="#CCC" />
         </div>
         <div class="tj-divider" style="margin: 0 16px;"></div>
         <!-- 我的收藏 -->
         <div class="tj-profile-cell" @click="goFavorites">
-          <van-icon name="star-o" size="20" color="#FFB800" />
+          <van-icon name="star" size="20" color="#FFB800" />
           <span>我的收藏</span>
           <van-icon name="arrow" size="14" color="#CCC" />
         </div>
         <div class="tj-divider" style="margin: 0 16px;"></div>
         <!-- 联系客服 -->
         <div class="tj-profile-cell" @click="contactService">
-          <van-icon name="service-o" size="20" color="#00BCD4" />
+          <van-icon name="service" size="20" color="#00BCD4" />
           <span>联系客服</span>
           <van-icon name="arrow" size="14" color="#CCC" />
         </div>
         <div class="tj-divider" style="margin: 0 16px;"></div>
         <!-- 关于我们 -->
         <div class="tj-profile-cell" @click="goAbout">
-          <van-icon name="info-o" size="20" color="#999" />
+          <van-icon name="info" size="20" color="#999" />
           <span>关于我们</span>
           <van-icon name="arrow" size="14" color="#CCC" />
         </div>
@@ -167,6 +162,55 @@ const guestCount = ref(0);
 const defaultAvatar = 'https://picsum.photos/128/128?random=888';
 
 const orderStats = ref({ pending: 2, confirmed: 0, toCheckIn: 1, completed: 0 });
+
+interface OrderStatusItem {
+  key: string;
+  tabIndex: number;
+  label: string;
+  icon: string;
+  bgColor: string;
+  iconColor: string;
+  count: number;
+}
+
+const orderStatus = computed<OrderStatusItem[]>(() => [
+  {
+    key: 'pending',
+    tabIndex: 0,
+    label: '待支付',
+    icon: 'balance-pay',
+    bgColor: '#FFF3E0',
+    iconColor: '#FF9800',
+    count: orderStats.value.pending,
+  },
+  {
+    key: 'confirmed',
+    tabIndex: 1,
+    label: '待确认',
+    icon: 'clock',
+    bgColor: '#E3F2FD',
+    iconColor: '#1890FF',
+    count: orderStats.value.confirmed,
+  },
+  {
+    key: 'checkin',
+    tabIndex: 2,
+    label: '待入住',
+    icon: 'hotel-o',
+    bgColor: '#E8F5E9',
+    iconColor: '#52C41A',
+    count: orderStats.value.toCheckIn,
+  },
+  {
+    key: 'completed',
+    tabIndex: 4,
+    label: '已完成',
+    icon: 'passed',
+    bgColor: '#F3E5F5',
+    iconColor: '#722ED1',
+    count: orderStats.value.completed,
+  },
+]);
 
 function maskPhone(phone: string): string {
   return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2');
@@ -264,6 +308,18 @@ onMounted(async () => {
   color: rgba(255, 255, 255, 0.72);
 }
 
+.tj-profile-user__edit {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* ========== 功能区 ========== */
 .tj-profile-content {
   padding: 12px 16px 0;
@@ -287,8 +343,55 @@ onMounted(async () => {
 }
 
 /* 订单宫格 */
-.tj-menu-grid {
-  border-radius: var(--tj-radius-md);
+.order-status-grid {
+  display: flex;
+  justify-content: space-around;
+  padding: 14px 8px 16px;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.15s;
+
+  &:active { transform: scale(0.94); }
+}
+
+.status-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: #FF4C4C;
+  font-size: 11px;
+  line-height: 16px;
+  border-radius: 8px;
+  border: 2px solid #fff;
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+.status-text {
+  font-size: 12px;
+  color: var(--tj-text-body);
 }
 
 /* 实名认证 */

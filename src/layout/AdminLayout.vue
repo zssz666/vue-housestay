@@ -17,6 +17,10 @@
           <el-icon><DataLine /></el-icon>
           <span>数据概览</span>
         </el-menu-item>
+        <el-menu-item index="/admin/users">
+          <el-icon><User /></el-icon>
+          <span>用户管理</span>
+        </el-menu-item>
         <el-menu-item index="/admin/audit">
           <el-icon><Stamp /></el-icon>
           <span>审核中心</span>
@@ -71,8 +75,8 @@
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
-import { 
-  Management, DataLine, Stamp, ScaleToOriginal, Setting, Bell 
+import {
+  Management, DataLine, User, Stamp, ScaleToOriginal, Setting, Bell
 } from '@element-plus/icons-vue';
 
 const route = useRoute();
@@ -120,19 +124,20 @@ const handleLogout = () => {
     :deep(.el-menu-item) {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       padding-right: 20px;
 
       &.is-active {
         background-color: #409eff !important;
         color: white !important;
+        .el-icon { color: white; }
       }
       &:hover {
         color: white !important;
       }
-      
+
       .menu-badge {
         margin-left: auto;
+        flex-shrink: 0;
         :deep(.el-badge__content) { border: none; }
       }
     }
@@ -176,16 +181,16 @@ const handleLogout = () => {
 /* Transition */
 .fade-transform-leave-active,
 .fade-transform-enter-active {
-  transition: all 0.3s;
+  transition: all 0.15s;
 }
 
 .fade-transform-enter-from {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateX(-15px);
 }
 
 .fade-transform-leave-to {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(15px);
 }
 </style>

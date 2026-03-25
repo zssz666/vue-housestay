@@ -309,14 +309,14 @@ async function handleSubmit() {
       orderStore.setContactPhone(contactPhone.value);
       showSuccessToast({ message: '订单提交成功' });
       orderStore.clearBooking();
-      router.replace('/order');
+      router.replace('/orders');
     } else {
       showToast(res.message || '提交失败');
     }
   } catch {
     showToast('模拟提交成功（开发环境）');
     orderStore.clearBooking();
-    router.replace('/order');
+    router.replace('/orders');
   }
   submitting.value = false;
 }

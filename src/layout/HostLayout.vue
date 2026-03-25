@@ -25,9 +25,9 @@
           <el-icon><List /></el-icon>
           <span>订单管理</span>
         </el-menu-item>
-        <el-menu-item index="/host/calendar">
-          <el-icon><Calendar /></el-icon>
-          <span>房态日历</span>
+        <el-menu-item index="/host/messages">
+          <el-icon><ChatDotRound /></el-icon>
+          <span>消息中心</span>
         </el-menu-item>
         <el-menu-item index="/host/finance">
           <el-icon><Wallet /></el-icon>
@@ -89,7 +89,7 @@ import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import { 
-  House, DataBoard, OfficeBuilding, List, Calendar, Wallet, Setting, 
+  House, DataBoard, OfficeBuilding, List, ChatDotRound, Wallet, Setting, 
   Bell, FullScreen 
 } from '@element-plus/icons-vue';
 
@@ -210,16 +210,16 @@ const handleCommand = (command: string) => {
 /* Transition */
 .fade-transform-leave-active,
 .fade-transform-enter-active {
-  transition: all 0.3s;
+  transition: all 0.15s;
 }
 
 .fade-transform-enter-from {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateX(-15px);
 }
 
 .fade-transform-leave-to {
   opacity: 0;
-  transform: translateX(30px);
+  transform: translateX(15px);
 }
 </style>

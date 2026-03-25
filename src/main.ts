@@ -8,6 +8,12 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import { isMobileDevice } from '@/utils/device';
 
 async function bootstrap() {
+  // 启用 Mock 数据（数据库未准备好时使用）
+  // 在 .env.development 中设置 VITE_USE_MOCK=true 来启用
+  if (import.meta.env.VITE_USE_MOCK === 'true' || import.meta.env.DEV) {
+    await import('@/mock/index');
+  }
+
   if (isMobileDevice()) {
     const MobileApp = (await import('@/views/mobile/App.vue')).default;
     const mobileRouter = (await import('@/views/mobile/router')).default;

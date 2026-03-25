@@ -190,6 +190,7 @@ async function handleLogin() {
 
     if (res.code === 200 && res.data) {
       userStore.setUserInfo(res.data);
+      userStore.token = 'mock-token-' + Date.now();
       showToast('登录成功');
       const redirect = (router.currentRoute.value.query.redirect as string) || '/';
       router.replace(redirect);
@@ -213,6 +214,7 @@ function mockLogin() {
     status: 1,
     createdAt: new Date().toISOString(),
   } as any);
+  userStore.token = 'mock-token-' + Date.now();
   showToast('登录成功（开发环境）');
   const redirect = (router.currentRoute.value.query.redirect as string) || '/';
   router.replace(redirect);

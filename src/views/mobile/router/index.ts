@@ -22,7 +22,7 @@ const router = createRouter({
         {
           path: 'messages',
           name: 'MobileMessages',
-          component: () => import('../pages/Messages.vue'),
+          component: () => import('../pages/ChatList.vue'),
         },
         {
           path: 'orders',
@@ -84,6 +84,18 @@ const router = createRouter({
       path: '/review/:orderId',
       name: 'MobileReview',
       component: () => import('../pages/Review.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/chat/:conversationId',
+      name: 'MobileChat',
+      component: () => import('../pages/Chat.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/edit-profile',
+      name: 'MobileEditProfile',
+      component: () => import('../pages/EditProfile.vue'),
       meta: { requiresAuth: true },
     },
   ],
