@@ -240,9 +240,9 @@ const homestayAudits = ref<HomestayAuditDetail[]>([
       price: 680,
       areaPrice: 450,
       images: [
-        'https://via.placeholder.com/600x400/1890ff/ffffff?text=客厅',
-        'https://via.placeholder.com/600x400/52c41a/ffffff?text=卧室',
-        'https://via.placeholder.com/600x400/faad14/ffffff?text=厨房'
+        '/public/imgs/dali.jpeg',
+        '/public/imgs/dali.jpeg',
+        '/public/imgs/dali.jpeg'
       ],
       address: '成都市锦江区春熙路188号',
       roomType: '整套公寓',
