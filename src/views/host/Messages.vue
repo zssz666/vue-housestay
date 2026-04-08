@@ -13,7 +13,7 @@
         <div
           class="conv-tab"
           :class="{ active: activeTab === 'conversations' }"
-          @click="activeTab = 'conversations'"
+          @click="setActiveTab('conversations')"
         >
           咨询会话
           <span v-if="totalUnread > 0" class="tab-badge">{{ totalUnread > 99 ? '99+' : totalUnread }}</span>
@@ -21,7 +21,7 @@
         <div
           class="conv-tab"
           :class="{ active: activeTab === 'system' }"
-          @click="activeTab = 'system'"
+          @click="setActiveTab('system')"
         >
           系统通知
           <span v-if="unreadNotifications > 0" class="tab-badge">{{ unreadNotifications }}</span>
@@ -118,9 +118,32 @@
       </div>
     </aside>
 
-    <!-- ====== 右侧聊天区域 ====== -->
-    <main class="chat-area" :class="{ 'mobile-show': activeConversation && isMobile }">
+    <!-- ====== 右侧：聊天 / 系统通知详情 ====== -->
+    <main class="chat-area" :class="{ 'mobile-show': activeConversation && isMobile && activeTab === 'conversations' }">
 
+      <template v-if="activeTab === 'system'">
+        <div v-if="!selectedNotification" class="chat-empty">
+          <div class="chat-empty-icon">
+            <el-icon size="64" color="#d9d9d9"><Bell /></el-icon>
+          </div>
+          <p class="chat-empty-text">请从左侧点击一条通知查看详情</p>
+        </div>
+        <div v-else class="notif-detail-panel">
+          <div class="notif-detail-inner">
+            <div class="notif-detail-header">
+              <el-tag v-if="selectedNotification.type" size="small" type="info" effect="plain">{{ notifTypeLabel(selectedNotification.type) }}</el-tag>
+              <h2 class="notif-detail-title">{{ selectedNotification.title }}</h2>
+              <div class="notif-detail-meta">{{ formatConvTime(selectedNotification.createdAt) }}</div>
+            </div>
+            <div class="notif-detail-content">{{ selectedNotification.content }}</div>
+            <el-button v-if="selectedNotification.relatedId" type="primary" plain class="notif-detail-link" @click="goRelatedNotif(selectedNotification)">
+              查看关联内容
+            </el-button>
+          </div>
+        </div>
+      </template>
+
+      <template v-else>
       <!-- 无选中会话 -->
       <div v-if="!activeConversation" class="chat-empty">
         <div class="chat-empty-icon">
@@ -345,7 +368,7 @@
             <div class="toolbar-left">
               <el-tooltip content="表情" placement="top">
                 <el-button text @click="showEmoji = !showEmoji">
-                  <el-icon><Smile /></el-icon>
+                  <svg t="1774493605625" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4813" width="18" height="18"><path d="M942.577061 507.011382c0-237.637282-192.632275-430.269557-430.269557-430.269557s-430.269557 192.632275-430.269557 430.269557c0 237.647515 192.632275 430.27979 430.269557 430.27979 97.553827 0 186.878225-33.189913 259.055081-87.88563 2.964518-3.363607 4.91187-7.655354 4.91187-12.479219 0-10.531867-8.541537-19.073404-19.072381-19.073404-5.465478 0-10.334369 2.168386-13.808494 5.842055l-0.242524 0c-64.584947 47.526433-144.086629 75.981509-230.422973 75.981509-215.179804 0-389.645324-174.489056-389.645324-389.656581 0-215.201294 174.466544-389.644301 389.645324-389.644301 215.202317 0 389.645324 174.443008 389.645324 389.644301 0 65.738213-15.423271 127.60219-44.186362 181.922353l0 0.321318c-0.533143 1.814322-1.108241 3.583618-1.108241 5.53097 0 10.531867 8.541537 19.073404 19.073404 19.073404 8.207939 0 15.06716-5.265934 17.745153-12.523221l0 0.13303C924.544359 645.279493 942.577061 578.258053 942.577061 507.011382zM399.574976 391.378805c0-24.028253-19.47147-43.499723-43.500746-43.499723-24.029276 0-43.478234 19.47147-43.478234 43.499723 0 24.029276 19.448958 43.479257 43.478234 43.479257C380.102483 434.858062 399.574976 415.408081 399.574976 391.378805zM669.735999 347.945597c-24.004717 0-43.476187 19.448958-43.476187 43.478234 0 24.029276 19.47147 43.500746 43.476187 43.500746 24.029276 0 43.50177-19.47147 43.50177-43.500746C713.237769 367.394554 693.766298 347.945597 669.735999 347.945597zM702.196295 630.742405c0-11.793604-9.558703-21.330818-21.350261-21.330818-1.88186 0-3.562129 0.620124-5.335519 1.084705l-0.441045 0c-49.473785 22.723537-104.548124 38.610366-162.562423 38.610366-57.130162 0-111.007233-16.130376-159.907966-38.233789l-0.177032 0c-2.300392-0.818645-4.690836-1.461281-7.2798-1.461281-11.880585 0-21.505803 9.602705-21.505803 21.485337 0 8.120958 4.513804 15.222703 11.129478 18.872836 54.209646 24.6494 113.883747 42.980907 177.319521 42.980907 63.037708 0 124.240629-18.686594 178.185238-43.046399 0.308015-0.149403 0.217964-0.11154 0.070608-0.045025C696.59574 645.928269 702.196295 638.545114 702.196295 630.742405z" fill="#595959" p-id="4814"></path></svg>
                 </el-button>
               </el-tooltip>
               <el-tooltip content="发送图片" placement="top">
@@ -419,6 +442,7 @@
           </div>
         </div>
       </template>
+      </template>
     </main>
 
     <!-- ====== 右键上下文菜单 ====== -->
@@ -484,8 +508,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ChatDotRound, WarningFilled, Bell, Phone, MoreFilled, ArrowLeft,
   Picture, ChatSquare, Close, Loading, CircleCloseFilled,
-  ChatLineSquare, FolderChecked, List, Tickets
+  ChatLineSquare, FolderChecked, List, Tickets, Comment
 } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { request } from '@/api/request'
 import { orders } from '@/mock/data'
 import type {
   Conversation, ChatMessage, SystemNotification
@@ -498,7 +524,7 @@ dayjs.locale('zh-cn')
 dayjs.extend(relativeTime)
 
 // ==================== 常量 ====================
-const hostAvatar = 'https://i.pravatar.cc/150?u=host2'
+const hostAvatar = '/avatar.jpg'
 
 const emojiList = ['😀','😂','😍','😊','🥰','😎','🤔','😅','😭','🤯','🥳','😴','🤝','👍','👎','❤️','🧡','💛','💚','💙','💜','🖤','🤍','💯','🔥','⭐','✨','🎉','🎊','🏠','🛏️','🛋️','🚿','📅','🕐','📍','✅','❌','⚠️','💬','📞','🔔']
 
@@ -519,6 +545,8 @@ const activeConversation = ref<Conversation | null>(null)
 const conversations = ref<Conversation[]>([])
 const messages = ref<ChatMessage[]>([])
 const notifications = ref<SystemNotification[]>([])
+const selectedNotification = ref<SystemNotification | null>(null)
+const router = useRouter()
 const loadingHistory = ref(false)
 const hasNewMessage = ref(false)
 const isAtBottom = ref(true)
@@ -601,18 +629,18 @@ const messageGroups = computed(() => {
 
 // ==================== 加载数据 ====================
 async function loadConversations() {
-  const res = await fetch('/api/host/conversations')
-  const data = await res.json()
-  if (data.code === 200) {
-    conversations.value = data.data
+  try {
+    conversations.value = await request.get<Conversation[]>('/host/conversations')
+  } catch {
+    conversations.value = []
   }
 }
 
 async function loadNotifications() {
-  const res = await fetch('/api/host/notifications')
-  const data = await res.json()
-  if (data.code === 200) {
-    notifications.value = data.data
+  try {
+    notifications.value = await request.get<SystemNotification[]>('/host/notifications')
+  } catch {
+    notifications.value = []
   }
 }
 
@@ -622,14 +650,15 @@ async function loadMessages(convId: string, reset = false) {
     noMoreHistory.value = false
   }
 
-  const res = await fetch(`/api/host/conversations/${convId}/messages`)
-  const data = await res.json()
-  if (data.code === 200) {
+  try {
+    const list = await request.get<ChatMessage[]>(`/host/conversations/${convId}/messages`)
     if (reset) {
-      messages.value = data.data
+      messages.value = list
     } else {
-      messages.value = [...data.data, ...messages.value]
+      messages.value = [...list, ...messages.value]
     }
+  } catch {
+    if (reset) messages.value = []
   }
 
   nextTick(() => {
@@ -638,11 +667,11 @@ async function loadMessages(convId: string, reset = false) {
 }
 
 async function markAsRead(convId: string) {
-  await fetch('/api/host/conversations/read', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ conversationId: convId })
-  })
+  try {
+    await request.post('/host/conversations/read', { conversationId: convId })
+  } catch {
+    return
+  }
   const conv = conversations.value.find(c => c.id === convId)
   if (conv) conv.unreadCount = 0
 }
@@ -688,36 +717,26 @@ async function handleSend() {
   nextTick(() => { autoResizeTextarea(); scrollToBottom(); })
 
   try {
-    const res = await fetch('/api/host/messages/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        conversationId: activeConversation.value.id,
-        type: 'text',
-        content: text,
-      })
+    const data = await request.post<ChatMessage>('/host/messages/send', {
+      conversationId: activeConversation.value.id,
+      type: 'text',
+      content: text,
     })
-    const data = await res.json()
-    if (data.code === 200) {
-      const idx = messages.value.findIndex(m => m.id === tempId)
-      if (idx >= 0) {
-        messages.value[idx] = { ...messages.value[idx]!, ...data.data, status: 'sent' }
-      }
-      // 更新会话最后消息
-      const conv = conversations.value.find(c => c.id === activeConversation.value?.id)
-      if (conv) {
-        conv.lastMessage = { content: text, type: 'text', timestamp: newMsg.timestamp, sender: 'host' }
-        conv.updatedAt = newMsg.timestamp
-      }
-    } else {
-      const idx = messages.value.findIndex(m => m.id === tempId)
-      if (idx >= 0) messages.value[idx]!.status = 'failed'
-      ElMessage.error('发送失败：' + (data.message ?? ''))
+    const idx = messages.value.findIndex(m => m.id === tempId)
+    if (idx >= 0) {
+      messages.value[idx] = { ...messages.value[idx]!, ...data, status: 'sent' }
     }
-  } catch {
+    const conv = conversations.value.find(c => c.id === activeConversation.value?.id)
+    if (conv) {
+      conv.lastMessage = { content: text, type: 'text', timestamp: newMsg.timestamp, sender: 'host' }
+      conv.updatedAt = newMsg.timestamp
+    }
+  } catch (e: any) {
     const idx = messages.value.findIndex(m => m.id === tempId)
     if (idx >= 0) messages.value[idx]!.status = 'failed'
-    ElMessage.error('发送失败，请重试')
+    if (!(e as any).originalError && e?.message) {
+      ElMessage.error(e.message)
+    }
   }
 }
 
@@ -736,20 +755,22 @@ async function sendImage() {
     status: 'sending',
   }
   messages.value.push(newMsg)
+  const imageUrl = pendingImage.value
   pendingImage.value = ''
   nextTick(() => scrollToBottom())
 
-  await fetch('/api/host/messages/send', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  try {
+    await request.post('/host/messages/send', {
       conversationId: activeConversation.value.id,
       type: 'image',
-      imageUrl: pendingImage.value,
+      imageUrl,
     })
-  })
-  const idx = messages.value.findIndex(m => m.id === tempId)
-  if (idx >= 0) messages.value[idx]!.status = 'sent'
+    const idx = messages.value.findIndex(m => m.id === tempId)
+    if (idx >= 0) messages.value[idx]!.status = 'sent'
+  } catch {
+    const idx = messages.value.findIndex(m => m.id === tempId)
+    if (idx >= 0) messages.value[idx]!.status = 'failed'
+  }
 }
 
 function sendQuickReply(text: string) {
@@ -767,11 +788,11 @@ async function recallMessage(msg: ChatMessage) {
     ElMessage.warning('超过2分钟，无法撤回')
     return
   }
-  await fetch('/api/host/messages/recall', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ conversationId: msg.conversationId, messageId: msg.id })
-  })
+  try {
+    await request.post('/host/messages/recall', { conversationId: msg.conversationId, messageId: msg.id })
+  } catch {
+    return
+  }
   msg.status = 'recalled'
   msg.isRecalled = true
   msg.recalledAt = new Date().toISOString()
@@ -888,8 +909,46 @@ function autoResizeTextarea() {
 }
 
 // ==================== 系统通知 ====================
+function setActiveTab(tab: 'conversations' | 'system') {
+  activeTab.value = tab
+  if (tab === 'conversations') {
+    selectedNotification.value = null
+  }
+}
+
+function notifTypeLabel(type: string) {
+  const map: Record<string, string> = {
+    order: '订单',
+    review: '评价',
+    audit: '审核',
+    finance: '财务',
+    system: '系统',
+  }
+  return map[type] || type
+}
+
+function goRelatedNotif(n: SystemNotification) {
+  if (!n.relatedId) return
+  const id = n.relatedId
+  switch (n.type) {
+    case 'order':
+      router.push({ path: '/host/orders', query: { id: String(id) } })
+      break
+    case 'review':
+    case 'audit':
+      router.push({ path: '/host/properties' })
+      break
+    case 'finance':
+      router.push({ path: '/host/finance' })
+      break
+    default:
+      break
+  }
+}
+
 function handleNotifClick(notif: SystemNotification) {
   notif.isRead = true
+  selectedNotification.value = notif
 }
 
 // ==================== 投诉处理 ====================
@@ -987,16 +1046,15 @@ function handleGlobalClick(e: MouseEvent) {
   if (!target.closest('.quick-reply-panel') && !target.closest('.toolbar-left .el-button')) showQuickReply.value = false
 }
 
+watch(activeConversation, () => {
+  typingStatus.value = false
+})
+
 // ==================== 生命周期 ====================
 onMounted(() => {
   loadConversations()
   loadNotifications()
   document.addEventListener('click', handleGlobalClick)
-
-  // 模拟对方输入状态（3秒后自动消失）
-  watch(activeConversation, () => {
-    typingStatus.value = false
-  })
 })
 
 onUnmounted(() => {
@@ -1033,6 +1091,9 @@ onUnmounted(() => {
 .conv-tabs {
   display: flex;
   border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 
 .conv-tab {
@@ -1236,7 +1297,53 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 12px;
+  min-height: 0;
   .chat-empty-text { font-size: 14px; color: #bfbfbf; }
+}
+
+// 系统通知详情（右侧）
+.notif-detail-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-detail-inner {
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.notif-detail-title {
+  margin: 12px 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  line-height: 1.4;
+}
+
+.notif-detail-meta {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-bottom: 16px;
+}
+
+.notif-detail-content {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #595959;
+  white-space: pre-wrap;
+}
+
+.notif-detail-link {
+  margin-top: 20px;
 }
 
 // ==================== 聊天头部 ====================
@@ -1339,16 +1446,34 @@ onUnmounted(() => {
   }
 }
 
-// 消息行
+// 消息行（房东侧：气泡在左、头像在右，与常见 IM 一致；顶部对齐）
 .message-row {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 8px;
   padding: 4px 16px;
   margin-bottom: 2px;
 
-  &.user { flex-direction: row; }
-  &.host { flex-direction: row-reverse; }
+  &.user {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+  &.host {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+  &.system {
+    justify-content: center;
+  }
+}
+
+.message-row.host .bubble-wrap {
+  align-items: flex-end;
+}
+
+.message-row.host .msg-status {
+  width: 100%;
+  justify-content: flex-end;
 }
 
 // 系统消息

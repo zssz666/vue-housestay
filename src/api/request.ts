@@ -103,6 +103,10 @@ export const request = {
   },
   del<T>(url: string, params?: any): Promise<T> {
     return service.delete(url, { params });
+  },
+  // delete 是 JavaScript 保留字，使用 del 作为方法名，此处提供别名以兼容某些调用场景
+  delete<T>(url: string, params?: any): Promise<T> {
+    return service.delete(url, { params });
   }
 };
 

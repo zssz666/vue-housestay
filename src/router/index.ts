@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { ElMessage } from 'element-plus';
-import MainLayout from '@/layout/MainLayout.vue';
-import Home from '@/views/user/Home.vue';
+import PortalLayout from '@/layout/PortalLayout.vue';
 import { useUserStore } from '@/stores/user';
+import { isMobileDevice } from '@/utils/device';
 
 const router = createRouter({
   // 使用 History 模式
@@ -15,52 +15,57 @@ const router = createRouter({
     }
   },
   routes: [
+    // ========================
+    // 门户首页（新增）
+    // ========================
     {
       path: '/',
-      component: MainLayout,
+      component: PortalLayout,
       children: [
         {
           path: '',
-          name: 'Home',
-          component: Home
+          name: 'PortalHome',
+          component: () => import('@/views/portal/Index.vue'),
         },
-        {
-          path: 'search',
-          name: 'Search',
-          component: () => import('@/views/user/Search.vue')
-        },
-        {
-          path: 'homestay/:id',
-          name: 'Detail',
-          component: () => import('@/views/user/Detail.vue')
-        },
-        {
-          path: 'book/create',
-          name: 'Booking',
-          component: () => import('@/views/user/Booking.vue'),
-          meta: { requiresAuth: true }
-        },
-        {
-          path: 'user',
-          component: () => import('@/views/user/Profile.vue'),
-          meta: { requiresAuth: true },
-          children: [
-            { path: '', redirect: '/user/orders' },
-            { path: 'orders', component: () => import('@/views/user/Orders.vue') },
-            { path: 'wishlist', component: () => import('@/views/user/Wishlist.vue') },
-            { path: 'invoice', component: () => import('@/views/user/Invoice.vue') },
-            { path: 'info', component: () => import('@/views/user/Info.vue') }, // Placeholder
-            { path: 'security', component: () => import('@/views/user/Security.vue') }, // Placeholder
-          ]
-        },
-        {
-          path: 'review', // Standalone review page
-          name: 'Review',
-          component: () => import('@/views/user/Review.vue'),
-          meta: { requiresAuth: true }
-        }
-      ]
+      ],
     },
+
+    // ========================
+    // 登录页
+    // ========================
+    {
+      path: '/login',
+      name: 'Login',
+      component: () => import('@/views/portal/Login.vue'),
+    },
+
+    // ========================
+    // 移动端 H5 页面（保留）
+    // ========================
+    {
+      path: '/m',
+      component: () => import('@/views/mobile/App.vue'),
+      children: [
+        { path: '', redirect: '/m/home' },
+        { path: 'home', component: () => import('@/views/mobile/pages/Home.vue') },
+        { path: 'search', component: () => import('@/views/mobile/pages/Search.vue') },
+        { path: 'detail/:id', component: () => import('@/views/mobile/pages/Detail.vue') },
+        { path: 'booking/:id', component: () => import('@/views/mobile/pages/Booking.vue'), meta: { requiresAuth: true } },
+        { path: 'order', component: () => import('@/views/mobile/pages/Order.vue'), meta: { requiresAuth: true } },
+        { path: 'profile', component: () => import('@/views/mobile/pages/Profile.vue'), meta: { requiresAuth: true } },
+        { path: 'edit-profile', component: () => import('@/views/mobile/pages/EditProfile.vue'), meta: { requiresAuth: true } },
+        { path: 'favorites', component: () => import('@/views/mobile/pages/Favorites.vue'), meta: { requiresAuth: true } },
+        { path: 'chat/:orderId?', component: () => import('@/views/mobile/pages/Chat.vue'), meta: { requiresAuth: true } },
+        { path: 'messages', component: () => import('@/views/mobile/pages/Messages.vue'), meta: { requiresAuth: true } },
+        { path: 'invoice', component: () => import('@/views/mobile/pages/Invoice.vue'), meta: { requiresAuth: true } },
+        { path: 'cert', component: () => import('@/views/mobile/pages/Cert.vue'), meta: { requiresAuth: true } },
+        { path: 'login', component: () => import('@/views/mobile/pages/Login.vue') },
+      ],
+    },
+
+    // ========================
+    // 房东端（保留完整功能）
+    // ========================
     {
       path: '/host',
       component: () => import('@/layout/HostLayout.vue'),
@@ -74,8 +79,12 @@ const router = createRouter({
         { path: 'finance', component: () => import('@/views/host/Finance.vue'), meta: { title: '财务管理' } },
         { path: 'settings', component: () => import('@/views/host/Settings.vue'), meta: { title: '设置' } },
         { path: 'checkout/:id', component: () => import('@/views/host/CheckOut.vue'), meta: { title: '退房验房' } },
-      ]
+      ],
     },
+
+    // ========================
+    // 管理端（保留完整功能）
+    // ========================
     {
       path: '/admin',
       component: () => import('@/layout/AdminLayout.vue'),
@@ -88,24 +97,48 @@ const router = createRouter({
         { path: 'dispute/:id', component: () => import('@/views/admin/Dispute.vue'), meta: { title: '纠纷详情' } },
         { path: 'users', component: () => import('@/views/admin/Users.vue'), meta: { title: '用户管理' } },
         { path: 'settings', component: () => import('@/views/admin/Settings.vue'), meta: { title: '系统设置' } },
-      ]
+      ],
     },
+
+    // ========================
+    // 已移除的路由（保留说明）
+    // ========================
+    // 以下是原 /user/* 路由，已移除并重定向到移动端
+    // - /user/Home.vue        → 已删除
+    // - /user/Search.vue      → 已删除
+    // - /user/Detail.vue     → 已删除
+    // - /user/Booking.vue    → 已删除
+    // - /user/Orders.vue     → 已删除
+    // - /user/Profile.vue    → 已删除
+    // - /user/Info.vue       → 已删除
+    // - /user/Invoice.vue    → 已删除
+    // - /user/Review.vue     → 已删除
+    // - /user/Security.vue   → 已删除
+    // - /user/Wishlist.vue   → 已删除
+
+    // ========================
+    // 404 兜底
+    // ========================
     {
-      path: '/login',
-      name: 'Login',
-      component: () => import('@/views/user/Login.vue') // Placeholder
-    }
-  ]
+      path: '/:pathMatch(.*)*',
+      redirect: '/',
+    },
+  ],
 });
 
-router.beforeEach((to, _from) => {
+// 全局导航守卫
+router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();
+
+  // 移动端访问根路径，自动跳转移动端
+  if (to.path === '/' && isMobileDevice()) {
+    return next('/m/home');
+  }
 
   // 需要认证的路由
   if (to.meta.requiresAuth) {
     if (!userStore.isLoggedIn) {
-      // 未登录，跳转到登录页，登录后返回原页面
-      return { path: '/login', query: { redirect: to.fullPath } };
+      return next({ path: '/login', query: { redirect: to.fullPath } });
     }
   }
 
@@ -113,11 +146,12 @@ router.beforeEach((to, _from) => {
   if (to.meta.role) {
     const requiredRole = to.meta.role as string;
     if (userStore.userInfo?.role !== requiredRole) {
-      // 角色不匹配，跳转到首页
       ElMessage.warning('您没有权限访问该页面');
-      return '/';
+      return next('/');
     }
   }
+
+  next();
 });
 
 export default router;

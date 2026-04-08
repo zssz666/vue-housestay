@@ -106,7 +106,6 @@
     <el-dialog
       v-model="withdrawFlowVisible"
       title="申请提现"
-      fullscreen
       destroy-on-close
       :close-on-click-modal="false"
       class="withdraw-flow-dialog"
@@ -462,8 +461,8 @@ type BankCard = {
 }
 
 const bankCards = ref<BankCard[]>([
-  { id: 1, bankName: '中国工商银行', cardType: '储蓄卡', cardNoLast4: '8888', cardHolder: '张昌炜', isDefault: true, iconText: '工' },
-  { id: 2, bankName: '中国建设银行', cardType: '储蓄卡', cardNoLast4: '6666', cardHolder: '张昌炜', isDefault: false, iconText: '建' },
+  { id: 1, bankName: '中国工商银行', cardType: '储蓄卡', cardNoLast4: '8888', cardHolder: 'stewie', isDefault: true, iconText: '工' },
+  { id: 2, bankName: '中国建设银行', cardType: '储蓄卡', cardNoLast4: '6666', cardHolder: 'stewie', isDefault: false, iconText: '建' },
 ])
 
 const showAddCardForm = ref(false)
