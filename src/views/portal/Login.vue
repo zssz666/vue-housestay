@@ -61,17 +61,16 @@
           :class="{ active: isRegister }"
           @click="isRegister = true"
         >
-          注册
+          成为房东
         </button>
         <div class="tab-indicator" :class="{ right: isRegister }"></div>
       </div>
 
       <!-- 卡片容器 -->
       <div class="flip-wrapper">
-        <transition name="slide-fade" mode="out-in">
-          <!-- 登录表单 -->
-          <div class="card-content" v-if="!isRegister" key="login">
-            <div class="title">欢迎回家</div>
+        <!-- 登录表单（始终保留 DOM，仅 v-if 控制显示） -->
+        <div class="card-content" v-show="!isRegister">
+          <div class="title">欢迎回家</div>
             
             <!-- 登录方式切换 -->
             <div class="login-mode-switch">
@@ -102,7 +101,7 @@
                     maxlength="11"
                     @focus="isTyping = true"
                     @blur="isTyping = false"
-                    @input="validatePhone(loginForm.phone, 'login')"
+                    @input="validatePhone(loginForm.phone)"
                   >
                   <span class="input-icon">📱</span>
                   <span 
@@ -125,7 +124,7 @@
                     type="button" 
                     class="code-btn" 
                     :class="{ loading: codeState.isSending }"
-                    @click="sendCode('login')"
+                  @click="sendCode()"
                     :disabled="codeState.countdown > 0 || codeState.isSending"
                   >
                     <span v-if="codeState.countdown > 0">{{ codeState.countdown }}s</span>
@@ -194,95 +193,231 @@
             </form>
           </div>
 
-          <!-- 注册表单 -->
-          <div class="card-content" v-else key="register">
-            <div class="title">加入栖居</div>
-            <form class="form" @submit.prevent="handleRegister">
+          <!-- 房东入驻三步表单 -->
+          <div class="card-content host-content" v-show="isRegister">
+            <div class="title">加入栖居 · 开启民宿经营</div>
+
+            <!-- 步骤条：el-steps 简洁横向，背景透明 -->
+            <el-steps :active="hostStep" finish-status="success" class="host-steps-el">
+              <el-step title="基础信息" :icon="User" />
+              <el-step title="账户设置" :icon="Lock" />
+              <el-step title="经营信息" :icon="House" />
+            </el-steps>
+
+            <!-- 步骤1：基础信息 -->
+            <div v-show="hostStep === 0" class="step-form">
               <div class="input-group">
-                <input 
-                  class="form-input" 
-                  v-model="registerForm.phone"
-                  placeholder="手机号"
-                  type="tel"
-                  maxlength="11"
-                  :class="{ error: registerFormErrors.phone }"
-                  @input="validatePhone(registerForm.phone, 'register')"
+                <input
+                  class="form-input"
+                  v-model="hostForm.realName"
+                  placeholder="真实姓名（需与身份证一致）"
+                  type="text"
+                  maxlength="10"
+                  @input="hostErrors.realName = ''"
                 >
-                <span 
-                  class="input-error" 
-                  v-if="registerFormErrors.phone"
-                >
-                  {{ registerFormErrors.phone }}
+                <span class="input-icon">👤</span>
+                <span class="input-error" v-if="hostErrors.realName">
+                  {{ hostErrors.realName }}
                 </span>
               </div>
 
               <div class="input-group">
                 <input
                   class="form-input"
-                  v-model="registerForm.password"
-                  placeholder="设置密码（至少6位）"
-                  :type="showRegisterPassword ? 'text' : 'password'"
-                  minlength="6"
+                  v-model="hostForm.idCard"
+                  placeholder="身份证号（18位）"
+                  type="text"
+                  maxlength="18"
+                  @input="hostErrors.idCard = ''"
                 >
-                <button
-                  type="button"
-                  class="password-toggle"
-                  @click="showRegisterPassword = !showRegisterPassword"
-                >
-                  {{ showRegisterPassword ? '🙈' : '👀' }}
-                </button>
+                <span class="input-icon">🪪</span>
+                <span class="input-error" v-if="hostErrors.idCard">
+                  {{ hostErrors.idCard }}
+                </span>
               </div>
 
               <div class="input-group">
                 <input
                   class="form-input"
-                  v-model="registerForm.confirmPassword"
-                  placeholder="确认密码"
-                  :type="showRegisterPassword ? 'text' : 'password'"
+                  v-model="hostForm.phone"
+                  placeholder="手机号"
+                  type="tel"
+                  maxlength="11"
+                  @input="hostErrors.phone = ''"
                 >
+                <span class="input-icon">📱</span>
+                <button
+                  type="button"
+                  class="code-btn"
+                  :class="{ loading: hostCodeState.isSending }"
+                  @click="sendHostCode"
+                  :disabled="hostCodeState.countdown > 0 || hostCodeState.isSending"
+                >
+                  <span v-if="hostCodeState.countdown > 0">{{ hostCodeState.countdown }}s</span>
+                  <span v-else-if="hostCodeState.isSending">发送中...</span>
+                  <span v-else>获取验证码</span>
+                </button>
+                <span class="input-error" v-if="hostErrors.phone">
+                  {{ hostErrors.phone }}
+                </span>
               </div>
 
               <div class="input-group">
-                <input 
-                  class="form-input" 
-                  v-model="registerForm.nickname" 
-                  placeholder="昵称（选填）" 
+                <input
+                  class="form-input"
+                  v-model="hostForm.verifyCode"
+                  placeholder="验证码（6位）"
+                  type="text"
+                  maxlength="6"
+                  @input="hostErrors.verifyCode = ''"
+                >
+                <span class="input-icon">🔐</span>
+                <span class="input-error" v-if="hostErrors.verifyCode">
+                  {{ hostErrors.verifyCode }}
+                </span>
+              </div>
+
+              <div class="form-actions">
+                <button class="submit-btn primary" @click="nextHostStep">
+                  下一步
+                </button>
+              </div>
+            </div>
+
+            <!-- 步骤2：账户设置 -->
+            <div v-show="hostStep === 1" class="step-form">
+              <div class="input-group">
+                <input
+                  class="form-input"
+                  v-model="hostForm.username"
+                  placeholder="设置登录账号（6-20位英文/数字）"
                   type="text"
                   maxlength="20"
+                  @input="hostErrors.username = ''"
                 >
+                <span class="input-icon">👤</span>
+                <span class="input-error" v-if="hostErrors.username">
+                  {{ hostErrors.username }}
+                </span>
               </div>
 
-              <div class="input-group" v-if="registerForm.nickname">
-                <div class="nickname-preview">
-                  <div class="avatar-preview">
-                    {{ registerForm.nickname.charAt(0) }}
+              <div class="input-group">
+                <input
+                  class="form-input"
+                  v-model="hostForm.password"
+                  placeholder="设置密码（至少6位，需包含字母和数字）"
+                  :type="showStep2Pwd ? 'text' : 'password'"
+                  maxlength="20"
+                  @input="hostErrors.password = ''"
+                >
+                <button
+                  type="button"
+                  class="password-toggle"
+                  @click="showStep2Pwd = !showStep2Pwd"
+                >
+                  {{ showStep2Pwd ? '🙈' : '👀' }}
+                </button>
+                <span class="input-error" v-if="hostErrors.password">
+                  {{ hostErrors.password }}
+                </span>
+              </div>
+
+              <div class="input-group">
+                <input
+                  class="form-input"
+                  v-model="hostForm.confirmPassword"
+                  placeholder="确认密码"
+                  :type="showStep2Pwd ? 'text' : 'password'"
+                  maxlength="20"
+                  @input="hostErrors.confirmPassword = ''"
+                >
+                <span class="input-icon">🔒</span>
+                <span class="input-error" v-if="hostErrors.confirmPassword">
+                  {{ hostErrors.confirmPassword }}
+                </span>
+              </div>
+
+              <div class="form-actions">
+                <button class="submit-btn secondary" @click="prevHostStep">
+                  上一步
+                </button>
+                <button class="submit-btn primary" @click="nextHostStep">
+                  下一步
+                </button>
+              </div>
+            </div>
+
+            <!-- 步骤3：经营信息 -->
+            <div v-show="hostStep === 2" class="step-form">
+              <div class="input-group">
+                <el-cascader
+                  v-model="hostForm.location"
+                  :options="locationOptions"
+                  placeholder="请选择房源所在地区"
+                  :props="{
+                    expandTrigger: 'hover',
+                    emitPath: true,
+                    value: 'value',
+                    label: 'label'
+                  }"
+                  @change="hostErrors.location = ''"
+                  class="cascader-input"
+                />
+                <span class="input-icon cascader-icon">📍</span>
+                <span class="input-error" v-if="hostErrors.location">
+                  {{ hostErrors.location }}
+                </span>
+              </div>
+
+              <div class="property-type-section">
+                <div class="section-label">房源类型</div>
+                <div class="property-type-cards">
+                  <div
+                    class="property-type-card"
+                    :class="{ selected: hostForm.propertyType === 'entire' }"
+                    @click="hostForm.propertyType = 'entire'; hostErrors.propertyType = ''"
+                  >
+                    <span class="type-icon">🏠</span>
+                    <span class="type-name">整套出租</span>
                   </div>
-                  <span>{{ registerForm.nickname }}</span>
+                  <div
+                    class="property-type-card"
+                    :class="{ selected: hostForm.propertyType === 'private' }"
+                    @click="hostForm.propertyType = 'private'; hostErrors.propertyType = ''"
+                  >
+                    <span class="type-icon">🛏️</span>
+                    <span class="type-name">独立房间</span>
+                  </div>
+                  <div
+                    class="property-type-card"
+                    :class="{ selected: hostForm.propertyType === 'shared' }"
+                    @click="hostForm.propertyType = 'shared'; hostErrors.propertyType = ''"
+                  >
+                    <span class="type-icon">🧑‍🤝‍🧑</span>
+                    <span class="type-name">合住房间</span>
+                  </div>
                 </div>
+                <span class="input-error" v-if="hostErrors.propertyType">
+                  {{ hostErrors.propertyType }}
+                </span>
               </div>
 
-              <div class="terms">
-                <label>
-                  <input type="checkbox" v-model="registerForm.agree">
-                  <span>我已阅读并同意<a href="#">服务协议</a>和<a href="#">隐私政策</a></span>
-                </label>
+              <div class="form-actions">
+                <button class="submit-btn secondary" @click="prevHostStep">
+                  上一步
+                </button>
+                <button
+                  class="submit-btn primary"
+                  :class="{ loading: isHostSubmitting }"
+                  @click="submitHostApplication"
+                  :disabled="isHostSubmitting"
+                >
+                  <span class="loading-spinner" v-if="isHostSubmitting"></span>
+                  <span v-else>提交入驻申请</span>
+                </button>
               </div>
-
-              <button 
-                class="submit-btn primary" 
-                type="submit"
-                :disabled="isRegisterLoading"
-              >
-                <span class="loading-spinner" v-if="isRegisterLoading"></span>
-                <span v-else>注册账号</span>
-              </button>
-              
-              <p class="host-link">
-                想要成为房东？<a @click="goToHostRegister">去入驻</a>
-              </p>
-            </form>
+            </div>
           </div>
-        </transition>
       </div>
     </div>
   </div>
@@ -292,6 +427,7 @@
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { User, Lock, House } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { authApi } from '@/api/modules/auth'
 
@@ -317,6 +453,129 @@ const showRegisterPassword = ref(false)
 const isLoginLoading = ref(false)
 const isRegisterLoading = ref(false)
 
+// 房东入驻步骤
+const hostStep = ref(0)
+const isHostSubmitting = ref(false)
+
+// 房东入驻表单数据
+const hostForm = reactive({
+  // 步骤1：基础信息
+  realName: '',
+  idCard: '',
+  phone: '',
+  verifyCode: '',
+  // 步骤2：账户设置
+  username: '',
+  password: '',
+  confirmPassword: '',
+  // 步骤3：经营信息
+  location: [] as number[],
+  propertyType: ''
+})
+
+// 房东入驻表单错误
+const hostErrors = reactive({
+  realName: '',
+  idCard: '',
+  phone: '',
+  verifyCode: '',
+  username: '',
+  password: '',
+  confirmPassword: '',
+  location: '',
+  propertyType: ''
+})
+
+// 验证码相关
+const hostCodeState = reactive({
+  countdown: 0,
+  isSending: false
+})
+let hostCountdownTimer: ReturnType<typeof setInterval> | null = null
+
+// 步骤2密码可见性
+const showStep2Pwd = ref(false)
+
+// 省市区选项数据（简化版）
+const locationOptions = [
+  {
+    value: 110000,
+    label: '北京市',
+    children: [
+      { value: 110100, label: '市辖区', children: [
+        { value: 110101, label: '东城区' },
+        { value: 110102, label: '西城区' },
+        { value: 110105, label: '朝阳区' },
+        { value: 110106, label: '丰台区' },
+        { value: 110107, label: '石景山区' },
+        { value: 110108, label: '海淀区' },
+      ]}
+    ]
+  },
+  {
+    value: 310000,
+    label: '上海市',
+    children: [
+      { value: 310100, label: '市辖区', children: [
+        { value: 310101, label: '黄浦区' },
+        { value: 310104, label: '徐汇区' },
+        { value: 310105, label: '长宁区' },
+        { value: 310106, label: '静安区' },
+        { value: 310107, label: '普陀区' },
+        { value: 310109, label: '虹口区' },
+      ]}
+    ]
+  },
+  {
+    value: 440000,
+    label: '广东省',
+    children: [
+      { value: 440100, label: '广州市', children: [
+        { value: 440103, label: '荔湾区' },
+        { value: 440104, label: '越秀区' },
+        { value: 440105, label: '海珠区' },
+        { value: 440106, label: '天河区' },
+        { value: 440111, label: '白云区' },
+      ]},
+      { value: 440300, label: '深圳市', children: [
+        { value: 440303, label: '罗湖区' },
+        { value: 440304, label: '福田区' },
+        { value: 440305, label: '南山区' },
+        { value: 440306, label: '宝安区' },
+      ]}
+    ]
+  },
+  {
+    value: 330000,
+    label: '浙江省',
+    children: [
+      { value: 330100, label: '杭州市', children: [
+        { value: 330102, label: '上城区' },
+        { value: 330105, label: '拱墅区' },
+        { value: 330106, label: '西湖区' },
+        { value: 330108, label: '滨江区' },
+      ]},
+      { value: 330200, label: '宁波市', children: [
+        { value: 330203, label: '海曙区' },
+        { value: 330205, label: '江北区' },
+      ]}
+    ]
+  },
+  {
+    value: 510000,
+    label: '四川省',
+    children: [
+      { value: 510100, label: '成都市', children: [
+        { value: 510104, label: '锦江区' },
+        { value: 510105, label: '青羊区' },
+        { value: 510106, label: '金牛区' },
+        { value: 510107, label: '武侯区' },
+        { value: 510108, label: '成华区' },
+      ]}
+    ]
+  }
+]
+
 // 登录表单
 const loginForm = reactive({
   phone: '',
@@ -336,28 +595,10 @@ const loginFormErrors = reactive({
   password: ''
 })
 
-// 注册表单
-const registerForm = reactive({
-  phone: '',
-  code: '',
-  password: '',
-  confirmPassword: '',
-  nickname: '',
-  agree: false
-})
-
-// 注册表单验证错误
-const registerFormErrors = reactive({
-  phone: '',
-  code: ''
-})
-
 // 验证码状态
 const codeState = reactive({
   countdown: 0,
-  regCountdown: 0,
-  isSending: false,
-  isSendingReg: false
+  isSending: false
 })
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
@@ -366,56 +607,48 @@ const isPasswordVisible = ref(false)
 const isPurpleBlinking = ref(false)
 const isBlackBlinking = ref(false)
 
-// 倒计时逻辑
-const startCountdown = (type: 'login' | 'register') => {
-  const target = type === 'login' ? 'countdown' : 'regCountdown'
-  codeState[target] = COUNTDOWN_SECONDS
-  countdownTimer = setInterval(() => {
-    codeState[target]--
-    if (codeState[target] <= 0 && countdownTimer) {
-      clearInterval(countdownTimer)
-      countdownTimer = null
-    }
-  }, 1000)
-}
-
 // 表单验证
-const validatePhone = (phone: string, form: 'login' | 'register') => {
-  const errors = form === 'login' ? loginFormErrors : registerFormErrors
-  errors.phone = phone && !PHONE_REGEX.test(phone) ? '请输入正确的手机号' : ''
-  return errors.phone === ''
+const validatePhone = (phone: string) => {
+  loginFormErrors.phone = phone && !PHONE_REGEX.test(phone) ? '请输入正确的手机号' : ''
+  return loginFormErrors.phone === ''
 }
 
 // 发送验证码
-const sendCode = async (type: 'login' | 'register') => {
-  const form = type === 'login' ? loginForm : registerForm
-  const errors = type === 'login' ? loginFormErrors : registerFormErrors
-  const target = type === 'login' ? 'countdown' : 'regCountdown'
-  const sendingKey = type === 'login' ? 'isSending' : 'isSendingReg'
+const sendCode = async () => {
+  if (codeState.countdown > 0) return
 
-  if (codeState[target] > 0) return
-
-  if (!form.phone) {
-    errors.phone = '请输入手机号'
+  if (!loginForm.phone) {
+    loginFormErrors.phone = '请输入手机号'
     return
   }
-  if (!PHONE_REGEX.test(form.phone)) {
-    errors.phone = '请输入正确的手机号'
+  if (!PHONE_REGEX.test(loginForm.phone)) {
+    loginFormErrors.phone = '请输入正确的手机号'
     return
   }
 
-  codeState[sendingKey] = true
+  codeState.isSending = true
 
   try {
-    // 调用后端API发送验证码
-    await authApi.sendVerifyCode(form.phone)
-    startCountdown(type)
+    await authApi.sendVerifyCode(loginForm.phone)
+    startCountdown()
     ElMessage.success('验证码已发送')
   } catch (error: any) {
     ElMessage.error(error.message || '发送失败，请重试')
   } finally {
-    codeState[sendingKey] = false
+    codeState.isSending = false
   }
+}
+
+// 登录倒计时
+const startCountdown = () => {
+  codeState.countdown = COUNTDOWN_SECONDS
+  countdownTimer = setInterval(() => {
+    codeState.countdown--
+    if (codeState.countdown <= 0 && countdownTimer) {
+      clearInterval(countdownTimer)
+      countdownTimer = null
+    }
+  }, 1000)
 }
 
 // 登录提交
@@ -466,55 +699,6 @@ const handleLogin = async () => {
   }
 }
 
-// 注册提交
-const handleRegister = async () => {
-  const { phone, password, confirmPassword, agree } = registerForm
-
-  if (!phone || !password) {
-    ElMessage.error('请填写完整信息')
-    return
-  }
-
-  if (!validatePhone(phone, 'register')) return
-
-  if (password.length < 6) {
-    ElMessage.error('密码至少需要6位')
-    return
-  }
-
-  if (password !== confirmPassword) {
-    ElMessage.error('两次密码输入不一致')
-    return
-  }
-
-  if (!agree) {
-    ElMessage.error('请同意服务协议')
-    return
-  }
-
-  isRegisterLoading.value = true
-
-  try {
-    // 调用后端注册API
-    const response = await authApi.register({
-      phone,
-      password: password,
-      nickname: registerForm.nickname || `用户${phone.slice(-4)}`
-    })
-
-    // 自动登录
-    userStore.login(response.user, response.token)
-    ElMessage.success('注册成功')
-
-    router.push('/')
-  } catch (error: any) {
-    console.error('注册失败:', error)
-    ElMessage.error(error.message || '注册失败')
-  } finally {
-    isRegisterLoading.value = false
-  }
-}
-
 // 密码输入处理
 const handlePasswordFocus = () => {
   isTyping.value = true
@@ -532,6 +716,226 @@ const handlePasswordBlur = () => {
 watch(loginMode, (mode) => {
   isPasswordVisible.value = mode === 'password'
 })
+
+// 房东入驻倒计时
+const startHostCountdown = () => {
+  hostCodeState.countdown = COUNTDOWN_SECONDS
+  hostCountdownTimer = setInterval(() => {
+    hostCodeState.countdown--
+    if (hostCodeState.countdown <= 0 && hostCountdownTimer) {
+      clearInterval(hostCountdownTimer)
+      hostCountdownTimer = null
+    }
+  }, 1000)
+}
+
+// 发送房东入驻验证码
+const sendHostCode = async () => {
+  if (hostCodeState.countdown > 0) return
+
+  if (!hostForm.phone) {
+    hostErrors.phone = '请输入手机号'
+    return
+  }
+  if (!PHONE_REGEX.test(hostForm.phone)) {
+    hostErrors.phone = '请输入正确的手机号'
+    return
+  }
+
+  hostCodeState.isSending = true
+  try {
+    await authApi.sendVerifyCode(hostForm.phone)
+    startHostCountdown()
+    ElMessage.success('验证码已发送')
+  } catch (error: any) {
+    ElMessage.error(error.message || '发送失败，请重试')
+  } finally {
+    hostCodeState.isSending = false
+  }
+}
+
+// 房东入驻步骤1校验
+const validateStep1 = (): boolean => {
+  let valid = true
+
+  // 真实姓名
+  if (!hostForm.realName) {
+    hostErrors.realName = '请输入真实姓名'
+    valid = false
+  } else if (!/^[\u4e00-\u9fa5]{2,10}$/.test(hostForm.realName)) {
+    hostErrors.realName = '请输入2-10个汉字的真实姓名'
+    valid = false
+  } else {
+    hostErrors.realName = ''
+  }
+
+  // 身份证号
+  const ID_CARD_REGEX = /^[1-9]\d{5}(18|19|20)\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$/
+  if (!hostForm.idCard) {
+    hostErrors.idCard = '请输入身份证号'
+    valid = false
+  } else if (!ID_CARD_REGEX.test(hostForm.idCard)) {
+    hostErrors.idCard = '请输入正确的18位身份证号'
+    valid = false
+  } else {
+    hostErrors.idCard = ''
+  }
+
+  // 手机号
+  if (!hostForm.phone) {
+    hostErrors.phone = '请输入手机号'
+    valid = false
+  } else if (!PHONE_REGEX.test(hostForm.phone)) {
+    hostErrors.phone = '请输入正确的手机号'
+    valid = false
+  } else {
+    hostErrors.phone = ''
+  }
+
+  // 验证码
+  if (!hostForm.verifyCode) {
+    hostErrors.verifyCode = '请输入验证码'
+    valid = false
+  } else if (!/^\d{6}$/.test(hostForm.verifyCode)) {
+    hostErrors.verifyCode = '请输入6位验证码'
+    valid = false
+  } else {
+    hostErrors.verifyCode = ''
+  }
+
+  return valid
+}
+
+// 房东入驻步骤2校验
+const validateStep2 = (): boolean => {
+  let valid = true
+
+  // 用户名
+  if (!hostForm.username) {
+    hostErrors.username = '请设置登录账号'
+    valid = false
+  } else if (!/^[a-zA-Z0-9]{6,20}$/.test(hostForm.username)) {
+    hostErrors.username = '账号需为6-20位英文/数字组合'
+    valid = false
+  } else {
+    hostErrors.username = ''
+  }
+
+  // 密码
+  if (!hostForm.password) {
+    hostErrors.password = '请设置密码'
+    valid = false
+  } else if (hostForm.password.length < 6) {
+    hostErrors.password = '密码至少6位'
+    valid = false
+  } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(hostForm.password)) {
+    hostErrors.password = '密码需包含字母和数字'
+    valid = false
+  } else {
+    hostErrors.password = ''
+  }
+
+  // 确认密码
+  if (!hostForm.confirmPassword) {
+    hostErrors.confirmPassword = '请再次输入密码'
+    valid = false
+  } else if (hostForm.confirmPassword !== hostForm.password) {
+    hostErrors.confirmPassword = '两次密码输入不一致'
+    valid = false
+  } else {
+    hostErrors.confirmPassword = ''
+  }
+
+  return valid
+}
+
+// 房东入驻步骤3校验
+const validateStep3 = (): boolean => {
+  let valid = true
+
+  // 房源位置
+  if (!hostForm.location || hostForm.location.length === 0) {
+    hostErrors.location = '请选择房源所在地区'
+    valid = false
+  } else {
+    hostErrors.location = ''
+  }
+
+  // 房源类型
+  if (!hostForm.propertyType) {
+    hostErrors.propertyType = '请选择房源类型'
+    valid = false
+  } else {
+    hostErrors.propertyType = ''
+  }
+
+  return valid
+}
+
+// 房东入驻下一步
+const nextHostStep = () => {
+  if (hostStep.value === 0) {
+    if (validateStep1()) {
+      hostStep.value = 1
+    }
+  } else if (hostStep.value === 1) {
+    if (validateStep2()) {
+      hostStep.value = 2
+    }
+  }
+}
+
+// 房东入驻上一步
+const prevHostStep = () => {
+  if (hostStep.value > 0) {
+    hostStep.value--
+  }
+}
+
+// 提交房东入驻申请
+const submitHostApplication = async () => {
+  if (!validateStep3()) return
+
+  isHostSubmitting.value = true
+
+  // 保存用户名用于后续填充
+  const registeredUsername = hostForm.username
+
+  try {
+    // 模拟API调用
+    await new Promise(resolve => setTimeout(resolve, 1500))
+
+    ElMessage.success({
+      message: '入驻申请已提交，工作人员将在1-3个工作日内审核，审核结果将短信通知您',
+      duration: 5000
+    })
+
+    // 重置步骤和数据
+    hostStep.value = 0
+    Object.assign(hostForm, {
+      realName: '',
+      idCard: '',
+      phone: '',
+      verifyCode: '',
+      username: '',
+      password: '',
+      confirmPassword: '',
+      location: [],
+      propertyType: ''
+    })
+
+    // 切换回登录标签并填充用户名
+    if (registeredUsername) {
+      loginForm.username = registeredUsername
+    }
+    isRegister.value = false
+    loginMode.value = 'password'
+  } catch (error: any) {
+    ElMessage.error(error.message || '提交失败，请重试')
+  } finally {
+    isHostSubmitting.value = false
+  }
+}
 
 // 微信登录
 const wxLogin = () => ElMessage.info('微信登录功能开发中')
@@ -558,6 +962,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (countdownTimer) clearInterval(countdownTimer)
+  if (hostCountdownTimer) clearInterval(hostCountdownTimer)
 })
 </script>
 
@@ -1181,5 +1586,161 @@ onUnmounted(() => {
 .slide-fade-leave-to {
   opacity: 0;
   transform: scale(0.98);
+}
+
+// 房东入驻内容区
+.host-content {
+  min-height: 580px;
+}
+
+// 步骤条：使用 el-steps 简洁横向样式
+.host-steps-el {
+  margin-bottom: 24px;
+  :deep(.el-step__title) {
+    font-size: 14px;
+  }
+  :deep(.el-step__icon) {
+    border-color: #FF5A5F;
+    color: #FF5A5F;
+  }
+  :deep(.el-step__title) {
+    color: #999;
+  }
+  :deep(.el-step__head.is-finish) {
+    .el-step__icon {
+      background: #52c41a;
+      border-color: #52c41a;
+      color: white;
+    }
+    .el-step__title {
+      color: #52c41a;
+    }
+  }
+  :deep(.el-step__head.is-process) {
+    .el-step__icon {
+      background: #FF5A5F;
+      border-color: #FF5A5F;
+      color: white;
+    }
+    .el-step__title {
+      color: #FF5A5F;
+      font-weight: 600;
+    }
+  }
+}
+
+// 步骤表单
+.step-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  animation: fadeIn 0.3s ease;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+// 表单操作按钮组
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+
+  .submit-btn {
+    flex: 1;
+  }
+}
+
+// 级联选择器样式
+.cascader-input {
+  width: 100%;
+
+  :deep(.el-input__wrapper) {
+    height: 48px;
+    padding: 0 14px;
+    border: 2px solid #e8e8e8;
+    border-radius: 10px;
+    font-size: 15px;
+    background: #fafafa;
+    box-shadow: none;
+
+    &:hover {
+      border-color: #d0d0d0;
+    }
+
+    &.is-focus {
+      border-color: #FF5A5F;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(255,90,95,0.1);
+    }
+  }
+}
+
+.cascader-icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+// 房源类型选择
+.property-type-section {
+  .section-label {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 12px;
+  }
+
+  .property-type-cards {
+    display: flex;
+    gap: 10px;
+
+    .property-type-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 8px;
+      border: 2px solid #e8e8e8;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      .type-icon {
+        font-size: 28px;
+      }
+
+      .type-name {
+        font-size: 13px;
+        color: #666;
+      }
+
+      &:hover {
+        border-color: #FF5A5F;
+        background: rgba(255,90,95,0.03);
+      }
+
+      &.selected {
+        border-color: #FF5A5F;
+        background: rgba(255,90,95,0.08);
+
+        .type-name {
+          color: #FF5A5F;
+          font-weight: 500;
+        }
+      }
+    }
+  }
 }
 </style>

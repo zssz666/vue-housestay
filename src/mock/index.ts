@@ -2,6 +2,9 @@ import Mock from 'mockjs';
 import { homestays, orders, reviews, users } from './data';
 import type { Homestay, Order, Review, User } from '@/types';
 
+// Re-export 所有 Mock 数据，供其他模块直接使用
+export { homestays, orders, reviews, users } from './data';
+
 // 设置全局延迟 50-100ms，模拟网络延迟
 Mock.setup({
   timeout: '50-100',
@@ -49,7 +52,7 @@ Mock.mock(/\/api\/auth\/login/, 'post', (options: any) => {
   }
 
   // 管理员账号：13700137000 / admin123
-  if (phone === '13700137000' && password === 'admin123') {
+  if (phone === '13700137000' && password === '123') {
     return {
       code: 200,
       data: {
@@ -83,7 +86,70 @@ Mock.mock(/\/api\/auth\/me/, 'get', () => ({
   timestamp: Date.now(),
 }));
 
-Mock.mock(/\/api\/auth\/code/, 'post', () => ({
+// ============ 验证码登录 Mock（新增：支持 /api/auth/login/code） ============
+// 快捷测试账号：任意手机号 + 验证码 999999（或 123456）直接登录成功
+Mock.mock('/api/auth/login/code', 'post', (options: any) => {
+  const body = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+  const { phone, code } = body;
+
+  // 允许以下快捷登录（无需真实验证码）
+  const validCodes = ['999999', '123456', '666666', '888888'];
+  // 构建完整用户对象，避免 undefined
+  const guestUser: User = { userId: 1, phone: '13800138000', username: 'guest001', email: 'guest@example.com', nickname: 'Guest User', avatar: '/avatar.jpg', role: 'guest' as const, status: 1 as const, createdAt: '2023-01-01 12:00:00' };
+  const hostUser: User = { userId: 2, phone: '13900139000', username: 'host001', email: 'host@example.com', nickname: 'Verified Host', avatar: '/avatar.jpg', role: 'host' as const, status: 1 as const, createdAt: '2023-02-01 10:00:00' };
+  const adminUser: User = { userId: 3, phone: '13700137000', username: 'admin001', email: 'admin@example.com', nickname: 'Admin User', avatar: '/avatar.jpg', role: 'admin' as const, status: 1 as const, createdAt: '2023-03-01 09:00:00' };
+  const testPhones: Record<string, { user: User; tokenPrefix: string }> = {
+    // 普通用户
+    '13800138000': { user: guestUser, tokenPrefix: 'mock_token_guest_' },
+    // 房东
+    '13900139000': { user: hostUser, tokenPrefix: 'mock_token_host_' },
+    // 管理员
+    '13700137000': { user: adminUser, tokenPrefix: 'mock_token_admin_' },
+    // 额外测试：超级管理员（角色 admin）
+    '13800000001': { user: { ...adminUser, userId: 100, phone: '13800000001', nickname: '超级管理员', role: 'admin' }, tokenPrefix: 'mock_admin_' },
+    // 额外测试：运营（角色 ops）
+    '13800000002': { user: { ...adminUser, userId: 101, phone: '13800000002', nickname: '运营专员', role: 'ops' }, tokenPrefix: 'mock_ops_' },
+    // 额外测试：财务（角色 finance）
+    '13800000003': { user: { ...adminUser, userId: 102, phone: '13800000003', nickname: '财务专员', role: 'finance' }, tokenPrefix: 'mock_finance_' },
+  };
+
+  // 判断是否是测试手机号（已配置的角色）或任意手机号+有效验证码
+  if (testPhones[phone]) {
+    const entry = testPhones[phone];
+    return {
+      code: 200,
+      data: {
+        token: entry.tokenPrefix + Date.now(),
+        user: entry.user,
+      },
+      message: '登录成功',
+      timestamp: Date.now(),
+    };
+  }
+
+  // 其他手机号：验证码为有效测试码时也放行（角色统一为 guest）
+  if (validCodes.includes(code)) {
+    return {
+      code: 200,
+      data: {
+        token: 'mock_token_guest_' + Date.now(),
+        user: { ...guestUser, userId: Math.floor(Math.random() * 10000) + 1000, phone, nickname: '用户' + phone.slice(-4) },
+      },
+      message: '登录成功',
+      timestamp: Date.now(),
+    };
+  }
+
+  return {
+    code: 401,
+    data: null,
+    message: '验证码错误或已失效',
+    timestamp: Date.now(),
+  };
+});
+
+// 验证码发送 Mock（已存在，直接返回成功）
+Mock.mock('/api/auth/code', 'post', () => ({
   code: 200,
   data: { code: '123456' },
   message: '验证码已发送',

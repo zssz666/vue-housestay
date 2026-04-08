@@ -12,7 +12,7 @@ export interface User {
   realName?: string;
   avatar: string;
   status: 0 | 1; // 0: disabled, 1: active
-  role: 'guest' | 'host' | 'admin';
+  role: 'guest' | 'host' | 'admin' | 'ops' | 'finance';
   createdAt: string;
 }
 
