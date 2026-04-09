@@ -215,7 +215,6 @@ Mock.mock(/\/api\/homestay\/list/, 'get', (options: any) => {
   const start = (page - 1) * size;
   const end = start + size;
   const list = homestays.filter(h => h.auditStatus === 1 && h.status === 1).slice(start, end);
-
   return {
     code: 200,
     data: {

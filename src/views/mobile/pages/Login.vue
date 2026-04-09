@@ -9,7 +9,7 @@
     <!-- Logo 区域 -->
     <div class="login-header">
       <div class="login-logo">
-        <div class="login-logo__icon">🏡</div>
+        <div class="login-logo__icon"><img src="/icon.svg" alt="logo"></div>
       </div>
       <div class="login-logo__title">栖居</div>
       <div class="login-logo__sub">让每一次旅行，都像回家</div>
@@ -278,19 +278,28 @@ onUnmounted(() => {
 }
 
 .login-logo {
-  width: 72px;
+   width: 72px;
   height: 72px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #FF9645, #FF7B3D);
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 16px;
   box-shadow: 0 8px 24px rgba(255, 150, 69, 0.4);
+  background-color: #fff; 
 }
 
 .login-logo__icon {
-  font-size: 36px;
+    display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+.login-logo__icon img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
 }
 
 .login-logo__title {

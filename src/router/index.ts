@@ -40,31 +40,7 @@ const router = createRouter({
     },
 
     // ========================
-    // 移动端 H5 页面（保留）
-    // ========================
-    {
-      path: '/m',
-      component: () => import('@/views/mobile/App.vue'),
-      children: [
-        { path: '', redirect: '/m/home' },
-        { path: 'home', component: () => import('@/views/mobile/pages/Home.vue') },
-        { path: 'search', component: () => import('@/views/mobile/pages/Search.vue') },
-        { path: 'detail/:id', component: () => import('@/views/mobile/pages/Detail.vue') },
-        { path: 'booking/:id', component: () => import('@/views/mobile/pages/Booking.vue'), meta: { requiresAuth: true } },
-        { path: 'order', component: () => import('@/views/mobile/pages/Order.vue'), meta: { requiresAuth: true } },
-        { path: 'profile', component: () => import('@/views/mobile/pages/Profile.vue'), meta: { requiresAuth: true } },
-        { path: 'edit-profile', component: () => import('@/views/mobile/pages/EditProfile.vue'), meta: { requiresAuth: true } },
-        { path: 'favorites', component: () => import('@/views/mobile/pages/Favorites.vue'), meta: { requiresAuth: true } },
-        { path: 'chat/:orderId?', component: () => import('@/views/mobile/pages/Chat.vue'), meta: { requiresAuth: true } },
-        { path: 'messages', component: () => import('@/views/mobile/pages/Messages.vue'), meta: { requiresAuth: true } },
-        { path: 'invoice', component: () => import('@/views/mobile/pages/Invoice.vue'), meta: { requiresAuth: true } },
-        { path: 'cert', component: () => import('@/views/mobile/pages/Cert.vue'), meta: { requiresAuth: true } },
-        { path: 'login', component: () => import('@/views/mobile/pages/Login.vue') },
-      ],
-    },
-
-    // ========================
-    // 房东端（保留完整功能）
+    // 房东端
     // ========================
     {
       path: '/host',
@@ -101,22 +77,6 @@ const router = createRouter({
     },
 
     // ========================
-    // 已移除的路由（保留说明）
-    // ========================
-    // 以下是原 /user/* 路由，已移除并重定向到移动端
-    // - /user/Home.vue        → 已删除
-    // - /user/Search.vue      → 已删除
-    // - /user/Detail.vue     → 已删除
-    // - /user/Booking.vue    → 已删除
-    // - /user/Orders.vue     → 已删除
-    // - /user/Profile.vue    → 已删除
-    // - /user/Info.vue       → 已删除
-    // - /user/Invoice.vue    → 已删除
-    // - /user/Review.vue     → 已删除
-    // - /user/Security.vue   → 已删除
-    // - /user/Wishlist.vue   → 已删除
-
-    // ========================
     // 404 兜底
     // ========================
     {
@@ -130,10 +90,6 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const userStore = useUserStore();
 
-  // 移动端访问根路径，自动跳转移动端
-  if (to.path === '/' && isMobileDevice()) {
-    return next('/m/home');
-  }
 
   // 需要认证的路由
   if (to.meta.requiresAuth) {

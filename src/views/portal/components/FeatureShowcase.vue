@@ -16,11 +16,13 @@
           :class="{ 'is-visible': isVisible }"
           :style="{ transitionDelay: `${0.1 + index * 0.1}s` }"
         >
-          <div class="cap-icon">
-            <component :is="cap.icon" />
+          <div class="cap-text">
+            <h3>{{ cap.title }}</h3>
+            <p>{{ cap.desc }}</p>
           </div>
-          <h3>{{ cap.title }}</h3>
-          <p>{{ cap.desc }}</p>
+          <el-icon class="cap-icon">
+            <component :is="cap.icon" />
+          </el-icon>
         </div>
       </div>
 
@@ -36,58 +38,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, shallowRef, h } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { Calendar, Wallet, TrendCharts, Headset } from '@element-plus/icons-vue';
 
 const sectionRef = ref<HTMLElement>();
 const isVisible = ref(false);
 
-// SVG 图标组件
-const ManagementIcon = shallowRef({
-  render: () => h('svg', {
-    width: 32, height: 32, viewBox: '0 0 24 24',
-    fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5'
-  }, [
-    h('rect', { x: 3, y: 4, width: 18, height: 18, rx: 2 }),
-    h('path', { d: 'M16 2v4M8 2v4M3 10h18' }),
-    h('path', { d: 'M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01' }),
-  ])
-});
-
-const WalletIcon = shallowRef({
-  render: () => h('svg', {
-    width: 32, height: 32, viewBox: '0 0 24 24',
-    fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5'
-  }, [
-    h('rect', { x: 1, y: 4, width: 22, height: 16, rx: 2 }),
-    h('path', { d: 'M1 10h22' }),
-    h('circle', { cx: 18, cy: 15, r: 2 }),
-  ])
-});
-
-const TrendChartsIcon = shallowRef({
-  render: () => h('svg', {
-    width: 32, height: 32, viewBox: '0 0 24 24',
-    fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5'
-  }, [
-    h('path', { d: 'M3 3v18h18' }),
-    h('path', { d: 'M18 9l-5 5-4-4-3 3' }),
-  ])
-});
-
-const ServiceIcon = shallowRef({
-  render: () => h('svg', {
-    width: 32, height: 32, viewBox: '0 0 24 24',
-    fill: 'none', stroke: 'currentColor', 'stroke-width': '1.5'
-  }, [
-    h('path', { d: 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z' }),
-  ])
-});
-
 const capabilities = [
-  { icon: ManagementIcon, title: '智能房态', desc: '多平台库存实时同步，超售预警' },
-  { icon: WalletIcon, title: '资金托管', desc: 'T+1 自动结算，流水清晰透明' },
-  { icon: TrendChartsIcon, title: '数据洞察', desc: '入住率分析，定价策略建议' },
-  { icon: ServiceIcon, title: '运营支持', desc: '专业客服团队 7×24 小时响应' },
+  { icon: Calendar, title: '智能房态', desc: '多平台库存实时同步，超售预警' },
+  { icon: Wallet, title: '资金托管', desc: 'T+1 自动结算，流水清晰透明' },
+  { icon: TrendCharts, title: '数据洞察', desc: '入住率分析，定价策略建议' },
+  { icon: Headset, title: '运营支持', desc: '专业客服团队 7×24 小时响应' },
 ];
 
 const stats = [
@@ -168,51 +129,68 @@ onUnmounted(() => {
 .capabilities {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 48px;
+  gap: 24px;
   margin-bottom: 80px;
 }
 
 .cap-item {
+  background: linear-gradient(135deg, #F0F7FF 0%, #FFFFFF 100%);
+  border: 1px solid rgba(224, 232, 255, 0.5);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  padding: 32px;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
   opacity: 0;
   transform: translateY(24px);
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 
   &.is-visible {
     opacity: 1;
     transform: translateY(0);
   }
 
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    background: linear-gradient(135deg, #E6F0FF 0%, #FFFFFF 100%);
+  }
+
+  .cap-text {
+    flex: 1;
+
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1A1A1A;
+      margin-bottom: 8px;
+      letter-spacing: 0.01em;
+    }
+
+    p {
+      font-size: 14px;
+      color: #666666;
+      line-height: 1.6;
+      font-weight: 400;
+    }
+  }
+
   .cap-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    background: rgba(26, 26, 26, 0.05);
-    color: rgba(26, 26, 26, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    font-size: 64px;
+    color: rgba(212, 165, 116, 0.15);
+    opacity: 0.6;
     transition: all 0.3s;
   }
 
-  h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #1A1A1A;
-    margin-bottom: 10px;
-    letter-spacing: 0.01em;
-  }
-
-  p {
-    font-size: 14px;
-    color: #666666;
-    line-height: 1.6;
-    font-weight: 400;
-  }
-
   &:hover .cap-icon {
-    background: linear-gradient(135deg, #D4A574 0%, #C9956A 100%);
-    color: #ffffff;
+    opacity: 1;
+    color: rgba(212, 165, 116, 0.25);
   }
 }
 
@@ -256,7 +234,7 @@ onUnmounted(() => {
 @media (max-width: 1024px) {
   .capabilities {
     grid-template-columns: repeat(2, 1fr);
-    gap: 40px;
+    gap: 24px;
   }
 }
 
@@ -274,20 +252,14 @@ onUnmounted(() => {
   }
 
   .capabilities {
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 56px;
   }
 
   .cap-item {
-    .cap-icon {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 16px;
-    }
-
-    h3 {
-      font-size: 16px;
-    }
+    min-height: 140px;
+    padding: 24px;
   }
 
   .live-stats {

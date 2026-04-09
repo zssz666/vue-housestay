@@ -454,8 +454,10 @@ async function loadHomestays() {
       page: 1,
       size: 20,
     }));
-    if (res.code === 200 && res.data?.length) homestayList.value = enrichList(res.data);
+    
+    if (res.list?.length) homestayList.value = enrichList(res.list);
     else homestayList.value = getMockHomestays();
+    
   } catch { homestayList.value = getMockHomestays(); }
   loading.value = false;
 }
@@ -918,14 +920,15 @@ onMounted(async () => {
 /* ========== 瀑布流 ========== */
 .tj-waterfall {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: calc(50% - 5px) calc(50% - 5px); // gap一半
   gap: 10px;
   padding: 0 16px;
   align-items: start;
+  box-sizing: border-box;
 }
 
 .tj-waterfall__col {
-  display: flex;
+  width: 100%;
   flex-direction: column;
 }
 
@@ -945,12 +948,7 @@ onMounted(async () => {
   width: 100%;
   overflow: hidden;
   background: #F0F0F0;
-}
-
-.tj-home-card__img-wrap::before {
-  content: '';
-  display: block;
-  padding-top: 133.33%;
+  aspect-ratio: 3 / 4;
 }
 
 .tj-home-card__img {

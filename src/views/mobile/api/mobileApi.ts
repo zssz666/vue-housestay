@@ -18,7 +18,7 @@ export function getCategories(): Promise<ApiResponse<MobileCategory[]>> {
 }
 
 // ========== Homestay ==========
-export function getHomestayList(params: MobileSearchParams): Promise<ApiResponse<Homestay[]>> {
+export function getHomestayList(params: MobileSearchParams): Promise<{ list: Homestay[]; total: number }> {
   return request.get('/homestay/list', params);
 }
 

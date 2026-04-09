@@ -99,32 +99,25 @@
           <van-icon name="arrow" size="14" color="#CCC" />
         </div>
         <div class="tj-divider" style="margin: 0 16px;"></div>
-        <!-- 发票管理 -->
-        <div class="tj-profile-cell" @click="router.push('/invoice')">
-          <van-icon name="balance-passed-o" size="20" color="#E91E63" />
-          <span>发票管理</span>
-          <van-icon name="arrow" size="14" color="#CCC" />
-        </div>
-        <div class="tj-divider" style="margin: 0 16px;"></div>
         <!-- 我的收藏 -->
         <div class="tj-profile-cell" @click="goFavorites">
           <van-icon name="star" size="20" color="#FFB800" />
           <span>我的收藏</span>
-          <van-icon name="arrow" size="14" color="#CCC" />
+          <van-icon class="tj-profile-cell__extra" name="arrow" size="14" color="#CCC" />
         </div>
         <div class="tj-divider" style="margin: 0 16px;"></div>
         <!-- 联系客服 -->
         <div class="tj-profile-cell" @click="contactService">
           <van-icon name="service" size="20" color="#00BCD4" />
           <span>联系客服</span>
-          <van-icon name="arrow" size="14" color="#CCC" />
+          <van-icon class="tj-profile-cell__extra" name="arrow" size="14" color="#CCC" />
         </div>
         <div class="tj-divider" style="margin: 0 16px;"></div>
         <!-- 关于我们 -->
         <div class="tj-profile-cell" @click="goAbout">
           <van-icon name="info" size="20" color="#999" />
           <span>关于我们</span>
-          <van-icon name="arrow" size="14" color="#CCC" />
+          <van-icon class="tj-profile-cell__extra" name="arrow" size="14" color="#CCC" />
         </div>
       </div>
 
@@ -137,8 +130,8 @@
 
       <!-- 底部版权 -->
       <div class="tj-profile-footer">
-        <div class="tj-profile-footer__logo">🏡 栖居</div>
-        <div class="tj-profile-footer__slogan">让每一次旅行，都像回家</div>
+        <div class="tj-profile-footer__logo"><img src="/log.svg"></div>
+        <div class="tj-profile-footer__slogan">发现独特的住宿体验</div>
         <div class="tj-profile-footer__copy">© 2026 栖居民宿预订平台</div>
       </div>
     </div>
