@@ -193,46 +193,32 @@
             </form>
           </div>
 
-          <!-- 房东入驻三步表单 -->
+          <!-- 房东入驻表单 -->
           <div class="card-content host-content" v-show="isRegister">
             <div class="title">加入栖居 · 开启民宿经营</div>
 
             <!-- 步骤条：el-steps 简洁横向，背景透明 -->
             <el-steps :active="hostStep" finish-status="success" class="host-steps-el">
-              <el-step title="基础信息" :icon="User" />
-              <el-step title="账户设置" :icon="Lock" />
+              <el-step title="账户设置" :icon="User" />
+              <el-step title="基础信息" :icon="Lock" />
+              <el-step title="头像简介" :icon="Lock" />
               <el-step title="经营信息" :icon="House" />
             </el-steps>
 
-            <!-- 步骤1：基础信息 -->
+            <!-- 步骤1：账户设置 -->
             <div v-show="hostStep === 0" class="step-form">
               <div class="input-group">
                 <input
                   class="form-input"
-                  v-model="hostForm.realName"
-                  placeholder="真实姓名（需与身份证一致）"
+                  v-model="hostForm.username"
+                  placeholder="设置登录账号（6-20位英文/数字）"
                   type="text"
-                  maxlength="10"
-                  @input="hostErrors.realName = ''"
+                  maxlength="20"
+                  @input="hostErrors.username = ''"
                 >
                 <span class="input-icon">👤</span>
-                <span class="input-error" v-if="hostErrors.realName">
-                  {{ hostErrors.realName }}
-                </span>
-              </div>
-
-              <div class="input-group">
-                <input
-                  class="form-input"
-                  v-model="hostForm.idCard"
-                  placeholder="身份证号（18位）"
-                  type="text"
-                  maxlength="18"
-                  @input="hostErrors.idCard = ''"
-                >
-                <span class="input-icon">🪪</span>
-                <span class="input-error" v-if="hostErrors.idCard">
-                  {{ hostErrors.idCard }}
+                <span class="input-error" v-if="hostErrors.username">
+                  {{ hostErrors.username }}
                 </span>
               </div>
 
@@ -277,30 +263,6 @@
                 </span>
               </div>
 
-              <div class="form-actions">
-                <button class="submit-btn primary" @click="nextHostStep">
-                  下一步
-                </button>
-              </div>
-            </div>
-
-            <!-- 步骤2：账户设置 -->
-            <div v-show="hostStep === 1" class="step-form">
-              <div class="input-group">
-                <input
-                  class="form-input"
-                  v-model="hostForm.username"
-                  placeholder="设置登录账号（6-20位英文/数字）"
-                  type="text"
-                  maxlength="20"
-                  @input="hostErrors.username = ''"
-                >
-                <span class="input-icon">👤</span>
-                <span class="input-error" v-if="hostErrors.username">
-                  {{ hostErrors.username }}
-                </span>
-              </div>
-
               <div class="input-group">
                 <input
                   class="form-input"
@@ -338,6 +300,90 @@
               </div>
 
               <div class="form-actions">
+                <button class="submit-btn primary" @click="nextHostStep">
+                  下一步
+                </button>
+              </div>
+            </div>
+
+            <!-- 步骤2：基础信息 -->
+            <div v-show="hostStep === 1" class="step-form">
+              <div class="input-group">
+                <input
+                  class="form-input"
+                  v-model="hostForm.realName"
+                  placeholder="真实姓名（需与身份证一致）"
+                  type="text"
+                  maxlength="10"
+                  @input="hostErrors.realName = ''"
+                >
+                <span class="input-icon">👤</span>
+                <span class="input-error" v-if="hostErrors.realName">
+                  {{ hostErrors.realName }}
+                </span>
+              </div>
+
+              <div class="input-group">
+                <input
+                  class="form-input"
+                  v-model="hostForm.idCard"
+                  placeholder="身份证号（18位）"
+                  type="text"
+                  maxlength="18"
+                  @input="hostErrors.idCard = ''"
+                >
+                <span class="input-icon">🪪</span>
+                <span class="input-error" v-if="hostErrors.idCard">
+                  {{ hostErrors.idCard }}
+                </span>
+              </div>
+
+              <!-- 身份证正面 -->
+              <div class="tj-form-item">
+                <div class="tj-form-item__label">身份证正面</div>
+                <div class="tj-cert-form__upload">
+                  <div v-if="!hostForm.idCardFront" class="tj-cert-form__upload-placeholder" @click="triggerUpload('front')">
+                    <van-icon name="photograph" size="28" color="#DCDEE0" />
+                    <div class="tj-cert-form__upload-text">点击上传正面</div>
+                  </div>
+                  <div v-else class="tj-cert-form__upload-preview" @click="triggerUpload('front')">
+                    <img :src="hostForm.idCardFront" alt="身份证正面" class="tj-cert-form__upload-img" />
+                    <div class="tj-cert-form__upload-mask">
+                      <van-icon name="photograph" size="24" color="#fff" />
+                    </div>
+                  </div>
+                </div>
+                <div class="tj-form-item__hint">请上传身份证正面，要求照片清晰可辨</div>
+                <span class="input-error" v-if="hostErrors.idCardFront">
+                  {{ hostErrors.idCardFront }}
+                </span>
+              </div>
+
+              <!-- 身份证反面 -->
+              <div class="tj-form-item">
+                <div class="tj-form-item__label">身份证反面</div>
+                <div class="tj-cert-form__upload">
+                  <div v-if="!hostForm.idCardBack" class="tj-cert-form__upload-placeholder" @click="triggerUpload('back')">
+                    <van-icon name="photograph" size="28" color="#DCDEE0" />
+                    <div class="tj-cert-form__upload-text">点击上传反面</div>
+                  </div>
+                  <div v-else class="tj-cert-form__upload-preview" @click="triggerUpload('back')">
+                    <img :src="hostForm.idCardBack" alt="身份证反面" class="tj-cert-form__upload-img" />
+                    <div class="tj-cert-form__upload-mask">
+                      <van-icon name="photograph" size="24" color="#fff" />
+                    </div>
+                  </div>
+                </div>
+                <div class="tj-form-item__hint">请上传身份证反面，要求照片清晰可辨</div>
+                <span class="input-error" v-if="hostErrors.idCardBack">
+                  {{ hostErrors.idCardBack }}
+                </span>
+              </div>
+
+              <input ref="fileInputFront" type="file" accept="image/*" style="display:none" @change="onIdCardFileChange($event, 'front')" />
+              <input ref="fileInputBack" type="file" accept="image/*" style="display:none" @change="onIdCardFileChange($event, 'back')" />
+
+              <div class="form-actions">
                 <button class="submit-btn secondary" @click="prevHostStep">
                   上一步
                 </button>
@@ -347,58 +393,111 @@
               </div>
             </div>
 
-            <!-- 步骤3：经营信息 -->
+            <!-- 步骤3：头像与简介 -->
             <div v-show="hostStep === 2" class="step-form">
+              <!-- 头像上传 -->
+              <div class="tj-form-item">
+                <div class="tj-form-item__label">头像</div>
+                <div class="tj-avatar-upload">
+                  <div v-if="!hostForm.landlordAvatar" class="tj-avatar-upload__placeholder" @click="triggerAvatarUpload">
+                    <van-icon name="photograph" size="28" color="#DCDEE0" />
+                    <div class="tj-avatar-upload__text">点击上传头像</div>
+                  </div>
+                  <div v-else class="tj-avatar-upload__preview" @click="triggerAvatarUpload">
+                    <img :src="hostForm.landlordAvatar" alt="头像" class="tj-avatar-upload__img" />
+                    <div class="tj-avatar-upload__mask">
+                      <van-icon name="photograph" size="24" color="#fff" />
+                    </div>
+                  </div>
+                </div>
+                <span class="input-error" v-if="hostErrors.landlordAvatar">
+                  {{ hostErrors.landlordAvatar }}
+                </span>
+              </div>
+              <input ref="fileInputAvatar" type="file" accept="image/*" style="display:none" @change="onAvatarFileChange" />
+
+              <!-- 个人简介 -->
               <div class="input-group">
-                <el-cascader
-                  v-model="hostForm.location"
-                  :options="locationOptions"
-                  placeholder="请选择房源所在地区"
-                  :props="{
-                    expandTrigger: 'hover',
-                    emitPath: true,
-                    value: 'value',
-                    label: 'label'
-                  }"
-                  @change="hostErrors.location = ''"
-                  class="cascader-input"
-                />
-                <span class="input-icon cascader-icon">📍</span>
-                <span class="input-error" v-if="hostErrors.location">
-                  {{ hostErrors.location }}
+                <div class="upload-label">个人简介</div>
+                <textarea
+                  class="form-input form-textarea"
+                  v-model="hostForm.landlordIntroduce"
+                  placeholder="介绍一下自己，让房客更了解您~"
+                  maxlength="200"
+                  rows="4"
+                  @input="hostErrors.landlordIntroduce = ''"
+                ></textarea>
+                <div class="word-count">{{ hostForm.landlordIntroduce.length }}/200</div>
+                <span class="input-error" v-if="hostErrors.landlordIntroduce">
+                  {{ hostErrors.landlordIntroduce }}
                 </span>
               </div>
 
+              <div class="form-actions">
+                <button class="submit-btn secondary" @click="prevHostStep">
+                  上一步
+                </button>
+                <button class="submit-btn primary" @click="nextHostStep">
+                  下一步
+                </button>
+              </div>
+            </div>
+
+            <!-- 步骤4：经营信息 -->
+            <div v-show="hostStep === 3" class="step-form">
+              <!-- 城市选择 -->
+              <div class="input-group upload-group">
+                <div class="upload-label">房源所在地区</div>
+                <div class="city-select-wrap">
+                  <select class="city-select" v-model="hostForm.province" @change="onProvinceChange($event)">
+                    <option value="">请选择省份</option>
+                    <option v-for="p in provinceList" :key="p" :value="p">{{ p }}</option>
+                  </select>
+                  <select class="city-select" v-model="hostForm.city" :disabled="!hostForm.province" @change="onCityChange($event)">
+                    <option value="">请选择城市</option>
+                    <option v-for="c in cityList" :key="c" :value="c">{{ c }}</option>
+                  </select>
+                  <select class="city-select" v-model="hostForm.district" :disabled="!hostForm.city">
+                    <option value="">请选择区县</option>
+                    <option v-for="d in districtList" :key="d" :value="d">{{ d }}</option>
+                  </select>
+                </div>
+                <span class="input-error" v-if="hostErrors.city">
+                  {{ hostErrors.city }}
+                </span>
+              </div>
+
+              <!-- 房源类型 -->
               <div class="property-type-section">
                 <div class="section-label">房源类型</div>
                 <div class="property-type-cards">
                   <div
                     class="property-type-card"
-                    :class="{ selected: hostForm.propertyType === 'entire' }"
-                    @click="hostForm.propertyType = 'entire'; hostErrors.propertyType = ''"
+                    :class="{ selected: hostForm.houseType === 1 }"
+                    @click="hostForm.houseType = 1; hostErrors.houseType = ''"
                   >
                     <span class="type-icon">🏠</span>
                     <span class="type-name">整套出租</span>
                   </div>
                   <div
                     class="property-type-card"
-                    :class="{ selected: hostForm.propertyType === 'private' }"
-                    @click="hostForm.propertyType = 'private'; hostErrors.propertyType = ''"
+                    :class="{ selected: hostForm.houseType === 2 }"
+                    @click="hostForm.houseType = 2; hostErrors.houseType = ''"
                   >
                     <span class="type-icon">🛏️</span>
                     <span class="type-name">独立房间</span>
                   </div>
                   <div
                     class="property-type-card"
-                    :class="{ selected: hostForm.propertyType === 'shared' }"
-                    @click="hostForm.propertyType = 'shared'; hostErrors.propertyType = ''"
+                    :class="{ selected: hostForm.houseType === 3 }"
+                    @click="hostForm.houseType = 3; hostErrors.houseType = ''"
                   >
                     <span class="type-icon">🧑‍🤝‍🧑</span>
                     <span class="type-name">合住房间</span>
                   </div>
                 </div>
-                <span class="input-error" v-if="hostErrors.propertyType">
-                  {{ hostErrors.propertyType }}
+                <span class="input-error" v-if="hostErrors.houseType">
+                  {{ hostErrors.houseType }}
                 </span>
               </div>
 
@@ -426,10 +525,12 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox as MessageBox } from 'element-plus'
+import { showToast } from 'vant'
 import { User, Lock, House } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
-import { authApi } from '@/api/modules/auth'
+import { authApi, areaApi } from '@/api/modules/auth'
+import { uploadApi, landlordApi } from '@/api/modules/landlord'
 
 const router = useRouter()
 const route = useRoute()
@@ -459,31 +560,43 @@ const isHostSubmitting = ref(false)
 
 // 房东入驻表单数据
 const hostForm = reactive({
-  // 步骤1：基础信息
-  realName: '',
-  idCard: '',
+  // 步骤1：账户设置
+  username: '',
   phone: '',
   verifyCode: '',
-  // 步骤2：账户设置
-  username: '',
   password: '',
   confirmPassword: '',
-  // 步骤3：经营信息
-  location: [] as number[],
-  propertyType: ''
+  // 步骤2：基础信息
+  realName: '',
+  idCard: '',
+  idCardFront: '',
+  idCardBack: '',
+  // 步骤3：头像与简介
+  landlordAvatar: '',
+  landlordIntroduce: '',
+  // 步骤4：经营信息
+  province: '',
+  city: '',
+  district: '',
+  houseType: 0
 })
 
 // 房东入驻表单错误
 const hostErrors = reactive({
-  realName: '',
-  idCard: '',
+  username: '',
   phone: '',
   verifyCode: '',
-  username: '',
   password: '',
   confirmPassword: '',
-  location: '',
-  propertyType: ''
+  realName: '',
+  idCard: '',
+  idCardFront: '',
+  idCardBack: '',
+  landlordAvatar: '',
+  landlordIntroduce: '',
+  province: '',
+  city: '',
+  houseType: ''
 })
 
 // 验证码相关
@@ -496,85 +609,16 @@ let hostCountdownTimer: ReturnType<typeof setInterval> | null = null
 // 步骤2密码可见性
 const showStep2Pwd = ref(false)
 
-// 省市区选项数据（简化版）
-const locationOptions = [
-  {
-    value: 110000,
-    label: '北京市',
-    children: [
-      { value: 110100, label: '市辖区', children: [
-        { value: 110101, label: '东城区' },
-        { value: 110102, label: '西城区' },
-        { value: 110105, label: '朝阳区' },
-        { value: 110106, label: '丰台区' },
-        { value: 110107, label: '石景山区' },
-        { value: 110108, label: '海淀区' },
-      ]}
-    ]
-  },
-  {
-    value: 310000,
-    label: '上海市',
-    children: [
-      { value: 310100, label: '市辖区', children: [
-        { value: 310101, label: '黄浦区' },
-        { value: 310104, label: '徐汇区' },
-        { value: 310105, label: '长宁区' },
-        { value: 310106, label: '静安区' },
-        { value: 310107, label: '普陀区' },
-        { value: 310109, label: '虹口区' },
-      ]}
-    ]
-  },
-  {
-    value: 440000,
-    label: '广东省',
-    children: [
-      { value: 440100, label: '广州市', children: [
-        { value: 440103, label: '荔湾区' },
-        { value: 440104, label: '越秀区' },
-        { value: 440105, label: '海珠区' },
-        { value: 440106, label: '天河区' },
-        { value: 440111, label: '白云区' },
-      ]},
-      { value: 440300, label: '深圳市', children: [
-        { value: 440303, label: '罗湖区' },
-        { value: 440304, label: '福田区' },
-        { value: 440305, label: '南山区' },
-        { value: 440306, label: '宝安区' },
-      ]}
-    ]
-  },
-  {
-    value: 330000,
-    label: '浙江省',
-    children: [
-      { value: 330100, label: '杭州市', children: [
-        { value: 330102, label: '上城区' },
-        { value: 330105, label: '拱墅区' },
-        { value: 330106, label: '西湖区' },
-        { value: 330108, label: '滨江区' },
-      ]},
-      { value: 330200, label: '宁波市', children: [
-        { value: 330203, label: '海曙区' },
-        { value: 330205, label: '江北区' },
-      ]}
-    ]
-  },
-  {
-    value: 510000,
-    label: '四川省',
-    children: [
-      { value: 510100, label: '成都市', children: [
-        { value: 510104, label: '锦江区' },
-        { value: 510105, label: '青羊区' },
-        { value: 510106, label: '金牛区' },
-        { value: 510107, label: '武侯区' },
-        { value: 510108, label: '成华区' },
-      ]}
-    ]
-  }
-]
+// 城市三级联动
+const provinceList = ref<string[]>([])
+const cityList = ref<string[]>([])
+const districtList = ref<string[]>([])
+const cityLoading = ref(false)
+
+// 身份证/头像上传 refs
+const fileInputFront = ref<HTMLInputElement | null>(null)
+const fileInputBack = ref<HTMLInputElement | null>(null)
+const fileInputAvatar = ref<HTMLInputElement | null>(null)
 
 // 登录表单
 const loginForm = reactive({
@@ -689,6 +733,23 @@ const handleLogin = async () => {
 
     userStore.login(response.user, response.token)
     ElMessage.success('登录成功')
+
+    // 检查房东审核状态
+    try {
+      const landlord = await landlordApi.getInfo()
+      if (landlord && landlord.auditStatus === 0) {
+        MessageBox.alert(
+          '您的房东入驻申请正在审核中，请耐心等待工作人员完成审核。',
+          '审核进行中',
+          {
+            confirmButtonText: '我知道了',
+            confirmButtonColor: '#FF9645',
+            showCancelButton: false,
+          }
+        )
+      }
+    } catch {}
+
     router.push('/')
   } catch (error: any) {
     console.error('登录失败:', error)
@@ -754,8 +815,70 @@ const sendHostCode = async () => {
   }
 }
 
-// 房东入驻步骤1校验
+// 步骤1 验证：账户设置
 const validateStep1 = (): boolean => {
+  let valid = true
+
+  // 用户名
+  if (!hostForm.username) {
+    hostErrors.username = '请设置登录账号'
+    valid = false
+  } else if (!/^[a-zA-Z0-9]{6,20}$/.test(hostForm.username)) {
+    hostErrors.username = '账号需为6-20位英文/数字组合'
+    valid = false
+  } else {
+    hostErrors.username = ''
+  }
+
+  // 手机号
+  if (!hostForm.phone) {
+    hostErrors.phone = '请输入手机号'
+    valid = false
+  } else if (!PHONE_REGEX.test(hostForm.phone)) {
+    hostErrors.phone = '请输入正确的11位手机号'
+    valid = false
+  } else {
+    hostErrors.phone = ''
+  }
+
+  // 验证码
+  if (!hostForm.verifyCode) {
+    hostErrors.verifyCode = '请输入验证码'
+    valid = false
+  } else if (hostForm.verifyCode.length !== 6) {
+    hostErrors.verifyCode = '验证码为6位'
+    valid = false
+  } else {
+    hostErrors.verifyCode = ''
+  }
+
+  // 密码
+  if (!hostForm.password) {
+    hostErrors.password = '请设置密码'
+    valid = false
+  } else if (hostForm.password.length < 6) {
+    hostErrors.password = '密码至少6位'
+    valid = false
+  } else {
+    hostErrors.password = ''
+  }
+
+  // 确认密码
+  if (!hostForm.confirmPassword) {
+    hostErrors.confirmPassword = '请确认密码'
+    valid = false
+  } else if (hostForm.confirmPassword !== hostForm.password) {
+    hostErrors.confirmPassword = '两次密码不一致'
+    valid = false
+  } else {
+    hostErrors.confirmPassword = ''
+  }
+
+  return valid
+}
+
+// 步骤2 验证：基础信息
+const validateStep2 = (): boolean => {
   let valid = true
 
   // 真实姓名
@@ -781,92 +904,44 @@ const validateStep1 = (): boolean => {
     hostErrors.idCard = ''
   }
 
-  // 手机号
-  if (!hostForm.phone) {
-    hostErrors.phone = '请输入手机号'
-    valid = false
-  } else if (!PHONE_REGEX.test(hostForm.phone)) {
-    hostErrors.phone = '请输入正确的手机号'
+  // 身份证正面
+  if (!hostForm.idCardFront) {
+    hostErrors.idCardFront = '请上传身份证正面'
     valid = false
   } else {
-    hostErrors.phone = ''
+    hostErrors.idCardFront = ''
   }
 
-  // 验证码
-  if (!hostForm.verifyCode) {
-    hostErrors.verifyCode = '请输入验证码'
-    valid = false
-  } else if (!/^\d{6}$/.test(hostForm.verifyCode)) {
-    hostErrors.verifyCode = '请输入6位验证码'
+  // 身份证反面
+  if (!hostForm.idCardBack) {
+    hostErrors.idCardBack = '请上传身份证反面'
     valid = false
   } else {
-    hostErrors.verifyCode = ''
+    hostErrors.idCardBack = ''
   }
 
   return valid
 }
 
-// 房东入驻步骤2校验
-const validateStep2 = (): boolean => {
-  let valid = true
-
-  // 用户名
-  if (!hostForm.username) {
-    hostErrors.username = '请设置登录账号'
-    valid = false
-  } else if (!/^[a-zA-Z0-9]{6,20}$/.test(hostForm.username)) {
-    hostErrors.username = '账号需为6-20位英文/数字组合'
-    valid = false
-  } else {
-    hostErrors.username = ''
-  }
-
-  // 密码
-  if (!hostForm.password) {
-    hostErrors.password = '请设置密码'
-    valid = false
-  } else if (hostForm.password.length < 6) {
-    hostErrors.password = '密码至少6位'
-    valid = false
-  } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(hostForm.password)) {
-    hostErrors.password = '密码需包含字母和数字'
-    valid = false
-  } else {
-    hostErrors.password = ''
-  }
-
-  // 确认密码
-  if (!hostForm.confirmPassword) {
-    hostErrors.confirmPassword = '请再次输入密码'
-    valid = false
-  } else if (hostForm.confirmPassword !== hostForm.password) {
-    hostErrors.confirmPassword = '两次密码输入不一致'
-    valid = false
-  } else {
-    hostErrors.confirmPassword = ''
-  }
-
-  return valid
-}
-
-// 房东入驻步骤3校验
+// 步骤3 验证：头像简介
 const validateStep3 = (): boolean => {
   let valid = true
 
-  // 房源位置
-  if (!hostForm.location || hostForm.location.length === 0) {
-    hostErrors.location = '请选择房源所在地区'
+  if (!hostForm.landlordAvatar) {
+    hostErrors.landlordAvatar = '请上传头像'
     valid = false
   } else {
-    hostErrors.location = ''
+    hostErrors.landlordAvatar = ''
   }
 
-  // 房源类型
-  if (!hostForm.propertyType) {
-    hostErrors.propertyType = '请选择房源类型'
+  if (!hostForm.landlordIntroduce) {
+    hostErrors.landlordIntroduce = '请填写个人简介'
+    valid = false
+  } else if (hostForm.landlordIntroduce.length < 10) {
+    hostErrors.landlordIntroduce = '简介至少10个字'
     valid = false
   } else {
-    hostErrors.propertyType = ''
+    hostErrors.landlordIntroduce = ''
   }
 
   return valid
@@ -882,6 +957,10 @@ const nextHostStep = () => {
     if (validateStep2()) {
       hostStep.value = 2
     }
+  } else if (hostStep.value === 2) {
+    if (validateStep3()) {
+      hostStep.value = 3
+    }
   }
 }
 
@@ -894,47 +973,183 @@ const prevHostStep = () => {
 
 // 提交房东入驻申请
 const submitHostApplication = async () => {
-  if (!validateStep3()) return
+  if (!hostForm.province || !hostForm.city || !hostForm.district) {
+    hostErrors.city = '请选择完整地区'
+    return
+  } else {
+    hostErrors.city = ''
+  }
+
+  if (!hostForm.houseType) {
+    hostErrors.houseType = '请选择房源类型'
+    return
+  } else {
+    hostErrors.houseType = ''
+  }
 
   isHostSubmitting.value = true
 
-  // 保存用户名用于后续填充
-  const registeredUsername = hostForm.username
+  const cityStr = hostForm.province + hostForm.city + hostForm.district
 
   try {
-    // 模拟API调用
-    await new Promise(resolve => setTimeout(resolve, 1500))
-
-    ElMessage.success({
-      message: '入驻申请已提交，工作人员将在1-3个工作日内审核，审核结果将短信通知您',
-      duration: 5000
+    // 提交房东注册申请
+    await landlordApi.register({
+      phone: hostForm.phone,
+      password: hostForm.password,
+      landlordName: hostForm.username,
+      realName: hostForm.realName,
+      idCard: hostForm.idCard,
+      idCardFront: hostForm.idCardFront,
+      idCardBack: hostForm.idCardBack,
+      landlordAvatar: hostForm.landlordAvatar,
+      landlordIntroduce: hostForm.landlordIntroduce,
+      city: cityStr,
+      houseType: hostForm.houseType,
     })
+
+    ElMessage.success({ message: '入驻申请已提交' })
 
     // 重置步骤和数据
     hostStep.value = 0
     Object.assign(hostForm, {
-      realName: '',
-      idCard: '',
-      phone: '',
-      verifyCode: '',
-      username: '',
-      password: '',
-      confirmPassword: '',
-      location: [],
-      propertyType: ''
+      username: '', phone: '', verifyCode: '', password: '', confirmPassword: '',
+      realName: '', idCard: '', idCardFront: '', idCardBack: '',
+      landlordAvatar: '', landlordIntroduce: '',
+      province: '', city: '', district: '', houseType: 0
     })
+    cityList.value = []
+    districtList.value = []
 
-    // 切换回登录标签并填充用户名
-    if (registeredUsername) {
-      loginForm.username = registeredUsername
-    }
-    isRegister.value = false
-    loginMode.value = 'password'
+    // 弹出审核提示框
+    MessageBox.alert(
+      '您的房东入驻申请已提交，工作人员将在1-3个工作日内完成审核。审核结果会以短信/站内信通知您，请耐心等待。',
+      '提交成功',
+      {
+        confirmButtonText: '我知道了',
+        confirmButtonColor: '#FF9645',
+        showCancelButton: false,
+      }
+    ).then(() => {
+      isRegister.value = false
+      loginMode.value = 'password'
+    })
   } catch (error: any) {
     ElMessage.error(error.message || '提交失败，请重试')
   } finally {
     isHostSubmitting.value = false
   }
+}
+
+// ============ 城市三级联动 ============
+async function loadProvinces() {
+  try {
+    const res = await areaApi.getProvinces()
+    if (res && res.list) {
+      provinceList.value = res.list.map((item: any) => item.name)
+    }
+  } catch {}
+}
+
+async function onProvinceChange(e: Event) {
+  const target = e.target as HTMLSelectElement
+  const province = target.value
+  if (!province) return
+  hostForm.province = province
+  console.log('省份变更:', province)
+  hostForm.city = ''
+  hostForm.district = ''
+  districtList.value = []
+  cityLoading.value = true
+  try {
+    const res = await areaApi.getCities(province)
+    if (res && res.list) {
+      cityList.value = res.list.map((item: any) => item.name)
+    }
+  } catch (e) {
+    console.error('加载城市失败:', e)
+  }
+  cityLoading.value = false
+}
+
+async function onCityChange(e: Event) {
+  const target = e.target as HTMLSelectElement
+  const city = target.value
+  if (!city) return
+  hostForm.city = city
+  hostForm.district = ''
+  try {
+    const res = await areaApi.getDistricts(hostForm.province, city)
+    if (res && res.list) {
+      districtList.value = res.list.map((item: any) => item.name)
+    }
+  } catch {}
+}
+
+// ============ 文件上传 ============
+function triggerUpload(type: 'front' | 'back' | 'avatar') {
+  if (type === 'front') fileInputFront.value?.click()
+  else if (type === 'back') fileInputBack.value?.click()
+  else fileInputAvatar.value?.click()
+}
+
+const triggerAvatarUpload = () => triggerUpload('avatar')
+
+async function uploadFile(file: File, folder: string): Promise<string> {
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片大小不能超过 5MB')
+    throw new Error('图片过大')
+  }
+  const res = await uploadApi.uploadImage(file, folder)
+  return res.url
+}
+
+async function onIdCardFileChange(e: Event, type: 'front' | 'back') {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('图片大小不能超过 5MB')
+    target.value = ''
+    return
+  }
+
+  // 预览
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    const url = ev.target?.result as string
+    if (type === 'front') hostForm.idCardFront = url
+    else hostForm.idCardBack = url
+  }
+  reader.readAsDataURL(file)
+
+  // 上传到 COS
+  try {
+    const url = await uploadFile(file, 'id-card')
+    if (type === 'front') hostForm.idCardFront = url
+    else hostForm.idCardBack = url
+  } catch {}
+  target.value = ''
+}
+
+async function onAvatarFileChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  // 预览
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    hostForm.landlordAvatar = ev.target?.result as string
+  }
+  reader.readAsDataURL(file)
+
+  // 上传到 COS
+  try {
+    const url = await uploadFile(file, 'landlord_avatar')
+    hostForm.landlordAvatar = url
+  } catch {}
+  target.value = ''
 }
 
 // 微信登录
@@ -958,6 +1173,7 @@ const scheduleBlink = (isBlinkingRef: typeof isPurpleBlinking) => {
 onMounted(() => {
   scheduleBlink(isPurpleBlinking)
   scheduleBlink(isBlackBlinking)
+  loadProvinces()
 })
 
 onUnmounted(() => {
@@ -1298,6 +1514,9 @@ onUnmounted(() => {
     border-color: #FF5A5F;
     background: white;
     box-shadow: 0 0 0 4px rgba(255,90,95,0.1);
+  }
+  &.form-textarea {
+    height: 100px;
   }
   
   &.error {
@@ -1742,5 +1961,122 @@ onUnmounted(() => {
       }
     }
   }
+}
+
+.tj-form-item {
+  margin-bottom: 12px;
+}
+
+.tj-form-item__label {
+  font-size: 13px;
+  color: var(--tj-text-body, #333);
+  margin-bottom: 8px;
+}
+
+.tj-form-item__hint {
+  font-size: 12px;
+  color: var(--tj-text-hint, #969799);
+  margin-top: 6px;
+}
+
+.tj-cert-form__upload {
+  position: relative;
+}
+
+.tj-cert-form__upload-placeholder {
+  width: 100%;
+  height: 180px;
+  border: 2px dashed #DCDEE0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:active { border-color: #FF9645; }
+}
+
+.tj-cert-form__upload-text {
+  font-size: 13px;
+  color: #969799;
+}
+
+.tj-cert-form__upload-preview {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tj-cert-form__upload-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.tj-cert-form__upload-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tj-avatar-upload {
+  position: relative;
+}
+
+.tj-avatar-upload__placeholder {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #DCDEE0;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+
+  &:active { border-color: #FF9645; }
+}
+
+.tj-avatar-upload__text {
+  font-size: 12px;
+  color: #969799;
+}
+
+.tj-avatar-upload__preview {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.tj-avatar-upload__img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.tj-avatar-upload__mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

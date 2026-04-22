@@ -160,8 +160,9 @@ async function sendSms() {
   try {
     await authApi.sendVerifyCode(phone.value);
     showToast('验证码已发送');
-  } catch {
-    showToast('验证码已发送（模拟）');
+  } catch (err: any) {
+    showToast(err.message || '发送失败');
+    return;
   }
   countdown.value = 60;
   countdownTimer = setInterval(() => {
@@ -183,45 +184,29 @@ async function handleLogin() {
   try {
     let res;
     if (activeTab.value === 'sms') {
-      res = await authApi.loginByCode(phone.value, smsCode.value);
+      res = await authApi.loginByCode({ phone: phone.value, code: smsCode.value });
     } else {
-      res = await authApi.login(phone.value, password.value);
+      res = await authApi.login({ phone: phone.value, password: password.value });
     }
 
-    if (res.code === 200 && res.data) {
-      userStore.setUserInfo(res.data);
-      userStore.token = 'mock-token-' + Date.now();
-      showToast('登录成功');
-      const redirect = (router.currentRoute.value.query.redirect as string) || '/';
-      router.replace(redirect);
+    if (res && res.token && res.user) {
+      userStore.login(res.user, res.token);
+      showToast({ message: '登录成功', onOpened: () => {
+        const redirect = (router.currentRoute.value.query.redirect as string) || '/';
+        router.replace(redirect);
+      }});
     } else {
-      // Mock login for development
-      mockLogin();
+      showToast('登录失败，请重试');
     }
-  } catch {
-    mockLogin();
+  } catch (err: any) {
+    showToast(err.message || '登录失败，请重试');
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
-}
-
-function mockLogin() {
-  userStore.setUserInfo({
-    userId: 1001,
-    phone: phone.value,
-    nickname: phone.value.slice(-4),
-    avatar: `https://picsum.photos/128/128?random=${Date.now()}`,
-    role: 'guest',
-    status: 1,
-    createdAt: new Date().toISOString(),
-  } as any);
-  userStore.token = 'mock-token-' + Date.now();
-  showToast('登录成功（开发环境）');
-  const redirect = (router.currentRoute.value.query.redirect as string) || '/';
-  router.replace(redirect);
 }
 
 function goRegister() {
-  showToast('注册功能开发中');
+  router.push('/register');
 }
 
 onUnmounted(() => {

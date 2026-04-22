@@ -8,13 +8,13 @@
       <div class="tj-profile-user" v-if="isLoggedIn">
         <img
           :src="userInfo?.avatar || defaultAvatar"
-          :alt="userInfo?.nickname"
+          :alt="userInfo?.name"
           class="tj-profile-user__avatar"
           @click="router.push('/edit-profile')"
         />
         <div class="tj-profile-user__info">
           <div class="tj-profile-user__name">
-            {{ userInfo?.nickname || '游客' }}
+            {{ userInfo?.name || '游客' }}
             <span v-if="userInfo?.realName" class="tj-tag tj-tag--orange">已实名</span>
             <span v-else class="tj-tag tj-tag--gray">未实名</span>
           </div>

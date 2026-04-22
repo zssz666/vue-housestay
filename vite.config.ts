@@ -44,12 +44,12 @@ export default defineConfig({
   // 设置 VITE_USE_MOCK=true 可以禁用代理，使用本地 mock 数据
   server: {
     port: 5173,
-    proxy: process.env.VITE_USE_MOCK !== 'true' ? {
+    proxy:{
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
       }
-    } : undefined,
+    },
     host:'0.0.0.0'
   }
 })

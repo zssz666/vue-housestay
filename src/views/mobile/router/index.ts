@@ -81,6 +81,11 @@ const router = createRouter({
       component: () => import('../pages/Login.vue'),
     },
     {
+      path: '/register',
+      name: 'MobileRegister',
+      component: () => import('../pages/Register.vue'),
+    },
+    {
       path: '/review/:orderId',
       name: 'MobileReview',
       component: () => import('../pages/Review.vue'),
@@ -96,6 +101,12 @@ const router = createRouter({
       path: '/edit-profile',
       name: 'MobileEditProfile',
       component: () => import('../pages/EditProfile.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/student-cert',
+      name: 'MobileStudentCert',
+      component: () => import('../pages/StudentCert.vue'),
       meta: { requiresAuth: true },
     },
   ],

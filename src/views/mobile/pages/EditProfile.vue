@@ -25,7 +25,7 @@
         <div class="avatar-wrap">
           <img
             class="avatar-img"
-            :src="form.avatar || defaultAvatar"
+            :src="form.avatar || ''"
             alt="头像"
           />
           <div class="avatar-camera">
@@ -48,7 +48,7 @@
       <van-cell-group class="tj-form-group" inset>
         <!-- 昵称 -->
         <van-field
-          v-model="form.nickname"
+          v-model="form.name"
           label="昵称"
           placeholder="请输入昵称"
           maxlength="20"
@@ -70,7 +70,7 @@
 
         <!-- 邮箱 -->
         <van-field
-          v-model="form.email"
+          v-model="form.userEmail"
           label="邮箱"
           placeholder="请输入邮箱"
           type="email"
@@ -83,36 +83,18 @@
         <van-cell title="性别" :border="false">
           <template #value>
             <van-radio-group v-model="form.gender" direction="horizontal" class="gender-group">
-              <van-radio name="male" shape="square" icon-size="16">男</van-radio>
-              <van-radio name="female" shape="square" icon-size="16">女</van-radio>
-              <van-radio name="secret" shape="square" icon-size="16">保密</van-radio>
+              <van-radio :name="1" shape="square" icon-size="16">男</van-radio>
+              <van-radio :name="0" shape="square" icon-size="16">女</van-radio>
             </van-radio-group>
           </template>
         </van-cell>
-
-        <div class="tj-divider" style="margin: 0 16px;"></div>
 
         <!-- 生日 -->
         <van-cell
           title="生日"
           is-link
-          :value="form.birthday || '未设置'"
+          :value="displayBirthday"
           @click="showBirthdayPicker = true"
-        />
-
-        <div class="tj-divider" style="margin: 0 16px;"></div>
-
-        <!-- 个性签名 -->
-        <van-field
-          v-model="form.signature"
-          label="个性签名"
-          type="textarea"
-          placeholder="介绍一下自己吧~"
-          maxlength="100"
-          rows="2"
-          autosize
-          show-word-limit
-          :border="false"
         />
       </van-cell-group>
 
@@ -121,9 +103,17 @@
         <van-cell
           title="实名认证"
           is-link
-          :value="userInfo?.realName ? `已认证 · ${userInfo.realName}` : '未认证'"
-          :value-class="userInfo?.realName ? 'cert-done' : 'cert-none'"
+          :value="certStatus === 1 ? `已认证 · ${userInfo?.realName || ''}` : certStatus === 0 ? '未认证' : '加载中...'"
+          :value-class="certStatus === 1 ? 'cert-done' : 'cert-none'"
           @click="$router.push('/cert')"
+        />
+        <!-- 学生认证入口 -->
+        <van-cell
+          title="学生认证"
+          is-link
+          :value="studentStatusDesc"
+          :value-class="studentStatusClass"
+          @click="$router.push('/student-cert')"
         />
       </van-cell-group>
 
@@ -200,20 +190,35 @@ const loading = ref(false);
 const showPhonePopup = ref(false);
 const showBirthdayPicker = ref(false);
 const fileInputEl = ref<HTMLInputElement | null>(null);
+const certStatus = ref<number>(-1);  // 实名认证状态 0=未认证, 1=已认证, -1=加载中
+const studentStatus = ref<number>(0); // 学生认证状态 0=未认证, 1=已认证
+
+const studentStatusDesc = computed(() => {
+  if (studentStatus.value === 1) return '已认证';
+  if (certStatus.value !== 1) return '请先完成实名认证';
+  return '未认证';
+});
+
+const studentStatusClass = computed(() => {
+  if (studentStatus.value === 1) return 'cert-done';
+  return 'cert-none';
+});
+
+const displayBirthday = computed(() => {
+  if (!form.birthday) return '未设置';
+  return form.birthday.split('T')[0];
+});
 
 // 表单数据
 const form = reactive({
-  nickname: '',
+  name: '',
   phone: '',
-  email: '',
-  gender: 'secret',
+  userEmail: '',
+  gender: null as number | null,
   birthday: '',
-  signature: '',
   avatar: '',
   realName: '',
 });
-
-const defaultAvatar = 'https://picsum.photos/128/128?random=888';
 
 // 生日选择器默认选中今天或已有生日
 const minDate = new Date(1900, 0, 1);
@@ -235,45 +240,48 @@ function formatter(val: string) {
 // 页面加载时填充数据
 onMounted(async () => {
   loading.value = true;
+
+  // 先用本地缓存填充
   if (userInfo.value) {
-    Object.assign(form, {
-      nickname: userInfo.value.nickname || '',
-      phone: userInfo.value.phone || '',
-      email: userInfo.value.email || '',
-      gender: (userInfo.value as any).gender || 'secret',
-      birthday: (userInfo.value as any).birthday || '',
-      signature: (userInfo.value as any).signature || '',
-      avatar: userInfo.value.avatar || '',
-      realName: userInfo.value.realName || '',
-    });
-    if (form.birthday) {
-      birthdayPickerValue.value = new Date(form.birthday);
-    }
+    fillForm(userInfo.value);
   }
 
-  // 请求最新用户信息
+  // 再请求最新用户信息
   try {
-    const res = await userApi.getUserInfo();
-    if (res.code === 200 && res.data) {
-      const d = res.data as any;
-      Object.assign(form, {
-        nickname: d.nickname || '',
-        phone: d.phone || '',
-        email: d.email || '',
-        gender: d.gender || 'secret',
-        birthday: d.birthday || '',
-        signature: d.signature || '',
-        avatar: d.avatar || '',
-        realName: d.realName || '',
-      });
-      if (form.birthday) birthdayPickerValue.value = new Date(form.birthday);
-      userStore.setUserInfo(res.data);
-    }
+    const user = await userApi.getUserInfo();
+    fillForm(user);
+    userStore.setUserInfo(user);
   } catch {
     // 使用本地缓存数据
   }
+
+  // 获取认证状态
+  try {
+    const [certRes, studentRes] = await Promise.all([
+      userApi.getCertStatus(),
+      userApi.getStudentCertStatus(),
+    ]);
+    certStatus.value = certRes.certStatus;
+    studentStatus.value = studentRes.studentStatus;
+  } catch {
+    certStatus.value = userInfo.value?.realName ? 1 : 0;
+    studentStatus.value = userInfo.value?.studentStatus ?? 0;
+  }
   loading.value = false;
 });
+
+function fillForm(u: User) {
+  form.name = u.name || '';
+  form.phone = u.phone || '';
+  form.userEmail = u.userEmail || '';
+  form.gender = u.gender ?? null;
+  form.birthday = u.birthday || '';
+  form.avatar = u.avatar || '';
+  form.realName = u.realName || '';
+  if (form.birthday) {
+    birthdayPickerValue.value = new Date(form.birthday);
+  }
+}
 
 onUnmounted(() => {
   if (phoneCountdownTimer) clearInterval(phoneCountdownTimer);
@@ -309,12 +317,12 @@ async function onFileChange(e: Event) {
 }
 
 function validateEmail() {
-  if (!form.email) {
+  if (!form.userEmail) {
     emailError.value = '';
     return;
   }
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!re.test(form.email)) {
+  if (!re.test(form.userEmail)) {
     emailError.value = '邮箱格式不正确';
   } else {
     emailError.value = '';
@@ -323,7 +331,8 @@ function validateEmail() {
 
 // 生日确认
 function onBirthdayConfirm(val: Date | Date[]) {
-  const date = Array.isArray(val) ? val[0] : val;
+  const date: Date = Array.isArray(val) ? val[0] : val;
+  if (!date) return;
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
@@ -341,8 +350,9 @@ async function sendPhoneCode() {
   try {
     await userApi.sendPhoneChangeCode(newPhone.value);
     showToast('验证码已发送');
-  } catch {
-    showToast('验证码已发送（模拟）');
+  } catch (err: any) {
+    showToast(err.message || '发送失败');
+    return;
   }
   phoneCountdown.value = 60;
   phoneCountdownTimer = setInterval(() => {
@@ -367,72 +377,46 @@ async function confirmChangePhone() {
   phoneError.value = '';
 
   try {
-    const res = await userApi.updateUserInfo({ phone: newPhone.value, code: phoneCode.value });
-    if (res.code === 200) {
-      form.phone = newPhone.value;
-      showPhonePopup.value = false;
-      newPhone.value = '';
-      phoneCode.value = '';
-      showSuccessToast({ message: '手机号更换成功' });
-    }
-  } catch {
+    await userApi.updateUserInfo({ phone: newPhone.value, code: phoneCode.value });
     form.phone = newPhone.value;
     showPhonePopup.value = false;
     newPhone.value = '';
     phoneCode.value = '';
-    showToast('手机号更换成功（模拟）');
+    showSuccessToast({ message: '手机号更换成功' });
+  } catch (err: any) {
+    showToast(err.message || '更换失败');
   }
 }
 
 // 保存
 async function handleSave() {
   if (saving.value) return;
-  if (!form.nickname.trim()) {
+  if (!form.name.trim()) {
     showToast('请输入昵称');
     return;
   }
-  if (form.email) validateEmail();
+  if (form.userEmail) validateEmail();
   if (emailError.value) return;
 
   saving.value = true;
   try {
     const updateData: any = {
-      nickname: form.nickname.trim(),
-      email: form.email,
+      name: form.name.trim(),
+      userEmail: form.userEmail,
       avatar: form.avatar,
     };
-    // 追加可选字段
     if (form.birthday) updateData.birthday = form.birthday;
-    if (form.signature) updateData.signature = form.signature;
-    if (form.gender) updateData.gender = form.gender;
+    if (form.gender !== null) updateData.gender = form.gender;
 
-    const res = await userApi.updateUserInfo(updateData);
-    if (res.code === 200) {
-      userStore.setUserInfo(res.data as User);
-      showSuccessToast({ message: '保存成功' });
-      setTimeout(() => history.back(), 800);
-    } else {
-      // Mock 保存成功
-      mockSave();
-    }
-  } catch {
-    mockSave();
+    const updatedUser = await userApi.updateUserInfo(updateData);
+    userStore.setUserInfo(updatedUser);
+    showSuccessToast({ message: '保存成功' });
+    setTimeout(() => history.back(), 800);
+  } catch (err: any) {
+    showToast(err.message || '保存失败');
+  } finally {
+    saving.value = false;
   }
-  saving.value = false;
-}
-
-function mockSave() {
-  userStore.setUserInfo({
-    ...(userStore.userInfo as any),
-    nickname: form.nickname.trim(),
-    email: form.email,
-    avatar: form.avatar,
-    birthday: form.birthday,
-    signature: form.signature,
-    gender: form.gender,
-  } as User);
-  showSuccessToast({ message: '保存成功' });
-  setTimeout(() => history.back(), 800);
 }
 </script>
 
@@ -456,7 +440,7 @@ function mockSave() {
 
 .tj-page__header-left,
 .tj-page__header-right {
-  width: 44px;
+  width: 50px;
   height: 44px;
   display: flex;
   align-items: center;
@@ -606,6 +590,11 @@ function mockSave() {
 
 .cert-none {
   color: #FAAD14 !important;
+  font-size: 14px;
+}
+
+.cert-pending {
+  color: #1677FF !important;
   font-size: 14px;
 }
 

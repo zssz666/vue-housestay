@@ -725,7 +725,8 @@ import {
   Lock, Postcard, Warning, CircleCheck, House, Timer,
   ChatLineRound, ChatDotRound, CaretRight,
 } from '@element-plus/icons-vue';
-import { useUserStore } from '@/stores/user';
+import { useUserStore } from '@/stores/user'
+import { landlordApi, uploadApi } from '@/api/modules/landlord';
 
 // ==================== 类型定义 ====================
 
@@ -1064,16 +1065,24 @@ async function handleAvatarUpload(options: { file: File }) {
 }
 
 async function confirmCrop() {
-  // 模拟裁剪上传
   avatarUploading.value = true;
-  for (let i = 0; i <= 100; i += 10) {
-    uploadProgress.value = i;
-    await new Promise(resolve => setTimeout(resolve, 100));
+  uploadProgress.value = 0;
+
+  try {
+    const blob = await fetch(cropperSrc.value).then(r => r.blob());
+    const file = new File([blob], 'avatar.jpg', { type: blob.type });
+    const url = await uploadApi.uploadImage(file, 'landlord_avatar');
+    profileForm.avatar = url.url;
+
+    // 同时更新后端
+    await landlordApi.updateProfile({ landlordAvatar: url.url });
+    ElMessage.success('头像上传成功');
+  } catch {
+    ElMessage.error('头像上传失败');
+  } finally {
+    avatarUploading.value = false;
+    cropperVisible.value = false;
   }
-  profileForm.avatar = cropperSrc.value;
-  avatarUploading.value = false;
-  cropperVisible.value = false;
-  ElMessage.success('头像上传成功');
 }
 
 async function handleSaveProfile() {
@@ -1081,10 +1090,18 @@ async function handleSaveProfile() {
   await profileFormRef.value.validate(async (valid) => {
     if (!valid) return;
     profileSaving.value = true;
-    // TODO: 调用 API 保存: PUT /api/host/profile
-    await new Promise(resolve => setTimeout(resolve, 800));
-    profileSaving.value = false;
-    ElMessage.success('个人资料保存成功');
+    try {
+      await landlordApi.updateProfile({
+        landlordAvatar: profileForm.avatar,
+        landlordIntroduce: profileForm.bio,
+        landlordName: profileForm.nickname,
+      });
+      ElMessage.success('个人资料保存成功');
+    } catch {
+      // error already shown by interceptor
+    } finally {
+      profileSaving.value = false;
+    }
   });
 }
 

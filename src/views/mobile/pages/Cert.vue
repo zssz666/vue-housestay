@@ -10,19 +10,19 @@
     </div>
 
     <div class="tj-cert-content">
-      <!-- 当前状态提示 -->
-      <div class="tj-cert-tip" v-if="certStatus !== 'none'">
+      <!-- 已认证状态 -->
+      <div class="tj-cert-tip" v-if="certStatus === 1">
         <div class="tj-cert-tip__icon">
           <van-icon name="checked" size="24" color="#52C41A" />
         </div>
         <div class="tj-cert-tip__text">
           <div class="tj-cert-tip__title">实名认证已通过</div>
-          <div class="tj-cert-tip__sub">认证信息：{{ userInfo?.realName || '—' }} · {{ maskIdCard(userInfo?.idCard || '') }}</div>
+          <div class="tj-cert-tip__sub">{{ userInfo?.realName || '—' }} · {{ maskIdCard(userInfo?.idCard || '') }}</div>
         </div>
       </div>
 
       <!-- 认证表单 -->
-      <div class="tj-card tj-cert-form" v-if="certStatus === 'none' || submitting">
+      <div class="tj-card tj-cert-form" v-if="certStatus === 0">
         <div class="tj-cert-form__title">
           <van-icon name="idcard" size="18" color="#FF9645" />
           身份信息
@@ -33,7 +33,6 @@
           <van-field
             v-model="form.realName"
             placeholder="请输入您的真实姓名"
-            :disabled="certStatus === 'verified'"
             class="tj-form-item__field"
           />
         </div>
@@ -44,7 +43,6 @@
             v-model="form.idCard"
             placeholder="请输入18位身份证号码"
             maxlength="18"
-            :disabled="certStatus === 'verified'"
             class="tj-form-item__field"
           />
         </div>
@@ -55,7 +53,6 @@
         </div>
 
         <van-button
-          v-if="certStatus !== 'verified'"
           block
           round
           type="primary"
@@ -88,21 +85,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { showToast, showSuccessToast } from 'vant';
 import { useUserStore } from '@/stores/user';
+import { userApi } from '@/api/modules/auth';
+import type { User } from '@/types';
 
 const userStore = useUserStore();
-const userInfo = computed(() => userStore.userInfo);
-const certStatus = ref<'none' | 'pending' | 'verified'>('none');
+const userInfo = userStore.userInfo;
+
+const certStatus = ref<number>(-1); // 0=未认证, 1=已认证, -1=加载中
 const submitting = ref(false);
 
 const form = ref({
-  realName: userInfo.value?.realName || '',
-  idCard: userInfo.value?.idCard || '',
+  realName: userInfo?.realName || '',
+  idCard: userInfo?.idCard || '',
 });
 
-certStatus.value = userInfo.value?.realName ? 'verified' : 'none';
+onMounted(async () => {
+  try {
+    const res = await userApi.getCertStatus();
+    certStatus.value = res.certStatus;
+    // 如果已认证，从最新用户信息同步
+    if (res.certStatus === 1 && userInfo) {
+      form.value.realName = userInfo.realName || '';
+      form.value.idCard = userInfo.idCard || '';
+    }
+  } catch {
+    certStatus.value = 0;
+  }
+});
 
 function maskIdCard(idCard: string): string {
   if (!idCard || idCard.length < 8) return idCard;
@@ -120,11 +132,15 @@ async function submitCert() {
   }
   submitting.value = true;
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    showSuccessToast('认证信息已提交，请等待审核');
-    certStatus.value = 'pending';
-  } catch {
-    showToast('提交失败，请重试');
+    const user: User = await userApi.submitCert({
+      realName: form.value.realName.trim(),
+      idCard: form.value.idCard.trim(),
+    });
+    userStore.setUserInfo(user);
+    certStatus.value = 1;
+    showSuccessToast('实名认证已通过');
+  } catch (err: any) {
+    showToast(err.message || '提交失败，请重试');
   } finally {
     submitting.value = false;
   }
